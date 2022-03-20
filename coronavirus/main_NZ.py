@@ -21,6 +21,7 @@ from common_path import create_path, get_file_name
 
 MAIN_URL = 'https://www.health.govt.nz/'
 URL = MAIN_URL + 'our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics'
+CASE_CSV = 'https://raw.githubusercontent.com/minhealthnz/nz-covid-data/main/cases/covid-cases.csv'
 
 
 def getDataFileFromWeb(url=URL):
@@ -39,14 +40,14 @@ def getDataFileFromWeb(url=URL):
 
 
 def plotStatistcs(df, title, label):
-    fontsize = 10
+    fontsize = 8
     kind = 'bar'
     # if df.shape[0] > 25:
     #     kind='barh'
     ax = df.plot(kind=kind, legend=False)  # color='gray'
 
     x_offset = -0.10
-    y_offset = 2.8
+    y_offset = 3.8
     for p in ax.patches:
         b = p.get_bbox()
         val = "{}".format(int(b.y1 + b.y0))
@@ -139,7 +140,7 @@ def parseConfirmed(df):
 
 
 def plotTotal(df, title, label, showNumberOnBar=False):
-    fontsize = 10
+    fontsize = 8
     plt.figure()
     ax = df.plot(kind='bar', legend=False)
 
@@ -242,11 +243,12 @@ def download_file(url):
 
 
 def getNZCovid19():
-    file_url = getDataFileFromWeb()
-    if file_url is None:
-        print("Can't find the file url form website, something wrong!")
-        return None
+    # file_url = getDataFileFromWeb()
+    # if file_url is None:
+    #     print("Can't find the file url form website, something wrong!")
+    #     return None
 
+    file_url = CASE_CSV
     file = download_file(file_url)
     return read_csv(file)
 

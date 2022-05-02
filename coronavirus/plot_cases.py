@@ -5,6 +5,7 @@
 # World case statistics by time
 """
 
+from cmath import nan
 import os
 import random
 import datetime
@@ -17,7 +18,7 @@ from predict_cases import gSaveBasePath, gSaveChangeData
 from predict_cases import gSaveCountryData, gSavePredict
 from json_update import get_datetime
 
-from common_path import create_path, traverse_files  # get_file_names
+from common_path import create_path, traverse_files, get_file_names
 from progress_bar import SimpleProgressBar
 
 SMALL_SIZE = 8
@@ -58,7 +59,7 @@ def plotCountriesFromOurWorld(csvpath=r'./OurWorld/'):  # From ourworld data
 
     countriesPath = r'./dataCountry/'
     dfToday = getAllOurWorldNew(countriesPath)
-    # dfToday.to_csv(r'./OurWorld/today.csv',index=True)
+    dfToday.to_csv(r'./OurWorld/today.csv',index=True)
 
     plotContinentCases(dfToday)
     plotCountriesTopCases(dfToday)
@@ -112,23 +113,37 @@ def getAllOurWorldNew(csvpath=r'./dataCountry/'):
 
         if not df.empty:
             # print('df=', df.head())
-            newestLine = df.iloc[[-1]]
-            return newestLine
+            if df.shape[0]>1:
+                newestLine = df.iloc[[-1]]
+                # print("newestLine=\n", newestLine);
+                if np.isnan(newestLine['total_cases'][0]): # filter the last line not equal to 0
+                    if df.shape[0]>2:
+                        newestLine = df.iloc[[-2]]
+                        return newestLine
+                return newestLine
+            # print("newestLine=\n", newestLine);
         return None
 
     dfAll = []
+    continents = ['Asia', 'Europe', 'Africa', 'North America', 'South America', 'Oceania', 'World']
     for fileCountry in traverse_files(csvpath, 'csv'):
         # fileCountry = os.path.join(vaccPath, 'vaccination_Burkina Faso.csv')
         line = getCountryNewestLine(fileCountry)
         # print('line=', line, type(line))
-        # print('fileCountry=', fileCountry)
+
+        continent = get_file_names(fileCountry)[0]
+        # print('fileCountry=', fileCountry, continent)
+
+        # if continent in continents:
+            # print('continents=', fileCountry, line['total_cases'][0])
+
         if line is not None:
             dfAll.append(line)
         # break
 
     dfAll = pd.concat(dfAll)
-    print(dfAll.head())
-    print(dfAll.columns, dfAll.shape)
+    # print("dfAll.head=\n", dfAll.head())
+    # print("dfAll.columns=\n",dfAll.columns, dfAll.shape)
     dfAll.set_index(["location"], inplace=True)
     return dfAll
 

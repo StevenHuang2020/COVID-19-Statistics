@@ -18,6 +18,7 @@ from plot_cases import gSaveBasePath, read_csv, init_folder
 from common.get_html import openUrl, download_webfile
 from common_path import create_path, get_file_name
 
+gNZ_DataSavePath = r'.\data\NZ'
 
 MAIN_URL = 'https://www.health.govt.nz/'
 URL = MAIN_URL + 'our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics'
@@ -40,7 +41,7 @@ def getDataFileFromWeb(url=URL):
 
 
 def plotStatistcs(df, title, label):
-    fontsize = 8
+    fontsize = 9
     kind = 'bar'
     # if df.shape[0] > 25:
     #     kind='barh'
@@ -53,14 +54,14 @@ def plotStatistcs(df, title, label):
         val = "{}".format(int(b.y1 + b.y0))
         ax.annotate(val, ((b.x0 + b.x1) / 2 + x_offset, b.y1 + y_offset), fontsize=fontsize)
 
-    ax.set_title(title, fontsize=fontsize)
+    ax.set_title(title, fontsize=fontsize + 1)
     # ax.legend(fontsize=fontsize)
     plt.setp(ax.get_xticklabels(), rotation=30, ha="right", fontsize=fontsize)
     plt.setp(ax.get_yticklabels(), rotation=30, fontsize=fontsize)
     plt.xlabel('')
     plt.ylabel('')
     plt.subplots_adjust(left=0.2, bottom=0.22, right=0.98, top=0.94, wspace=None, hspace=None)
-    plt.savefig(gSaveBasePath + 'NZ_' + label + '.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'NZ_' + label + '.png'))
     # plt.show()
 
 
@@ -159,7 +160,7 @@ def plotTotal(df, title, label, showNumberOnBar=False):
     plt.xlabel('')
     plt.ylabel('')
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
-    plt.savefig(gSaveBasePath + label + '.png')
+    plt.savefig(os.path.join(gSaveBasePath, label + '.png'))
     # plt.show()
 
 
@@ -232,7 +233,7 @@ def download_file(url):
     print('url=', url)
     print('name=', name)
 
-    dst_path = r'./NZ/'
+    dst_path = gNZ_DataSavePath
     create_path(dst_path)
     file = os.path.join(dst_path, name)
     res = download_webfile(url, file)
@@ -243,13 +244,8 @@ def download_file(url):
 
 
 def getNZCovid19():
-    # file_url = getDataFileFromWeb()
-    # if file_url is None:
-    #     print("Can't find the file url form website, something wrong!")
-    #     return None
-
-    file_url = CASE_CSV
-    file = download_file(file_url)
+    # return read_csv(r'.data\NZ\covid_cases_2022-01-26.csv')
+    file = download_file(CASE_CSV)
     return read_csv(file)
 
 
@@ -261,7 +257,6 @@ def plotStatistic(df):
 def main():
     init_folder()
     df = getNZCovid19()
-    # df = read_csv(r'.\NZ\covid_cases_2022-01-26.csv')
 
     if df is not None:
         plotStatistic(df)

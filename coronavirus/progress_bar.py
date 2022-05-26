@@ -31,26 +31,10 @@ class SimpleProgressBar():
         # sys.stdout.write('\r%d%% [%s]' % (int(x), '#' * pointer + '.' * (self.width - pointer)))
         # sys.stdout.write('\r%d%% [%s]' % (int(x), '=' * pointer + '>' + '.' * (self.width - pointer)))
         # sys.stdout.write('\r%d%% %d/%d [%s]' % (int(x), x, self.total, '=' * pointer + '>' + '.' * (self.width - pointer)))
-
         sys.stdout.write('\r%s:%d/%d %.2f%% [%s]' % (self.title, x, self.total, percent, '=' * pointer + '>' + '.' * (self.width - pointer)))
         sys.stdout.flush()
         if percent >= 100:
             print('')
-
-    '''
-    def update(self, x):
-        #assert 0 <= x <= 100 # `x`: progress in percent ( between 0 and 100)
-        if self.last_x == int(x): return
-        self.last_x = int(x)
-        pointer = int(self.width * (x / 100.0))
-        #sys.stdout.write( '\r%d%% [%s]' % (int(x), '#' * pointer + '.' * (self.width - pointer)))
-        #sys.stdout.write( '\r%d%% [%s]' % (int(x), '=' * pointer + '>' + '.' * (self.width - pointer)))
-        #sys.stdout.write( '\r%d%% %d/%d [%s]' % (int(x), x, self.total, '=' * pointer + '>' + '.' * (self.width - pointer)))
-        sys.stdout.write( '\r%d/%d %d%% [%s]' % (x, self.total, round(x*100/self.total,2), '=' * pointer + '>' + '.' * (self.width - pointer)))
-        sys.stdout.flush()
-        if x == 100:
-            print('')
-    '''
 
 
 def main():

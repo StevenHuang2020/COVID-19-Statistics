@@ -5,16 +5,14 @@
 # World case statistics by time
 """
 
-from cmath import nan
 import os
 import random
-import datetime
 import pandas as pd
 import numpy as np
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from predict_cases import plotDataAx, binaryDf
-from predict_cases import gSaveBasePath, gSaveChangeData
+from predict_cases import gSaveBasePath, gSaveChangeData, gDatasetPath
 from predict_cases import gSaveCountryData, gSavePredict
 from json_update import get_datetime
 
@@ -50,36 +48,37 @@ def get_datetime_str():
     return str(' Date:') + get_datetime()
 
 
-def plotCountriesFromOurWorld(csvpath=r'./OurWorld/'):  # From ourworld data
+def plotCountriesFromOurWorld(csvpath = gDatasetPath):  # From ourworld data
     saveCountriesInfoFromCsv(csvpath)
 
     casesFile = os.path.join(csvpath, 'cases.csv')
     df = read_csv(casesFile)
     plotWorldCases(df)
 
-    countriesPath = r'./dataCountry/'
-    dfToday = getAllOurWorldNew(countriesPath)
-    dfToday.to_csv(r'./OurWorld/today.csv',index=True)
+    dfToday = getAllOurWorldNew()
+    dfToday.to_csv(os.path.join(csvpath, 'today.csv'),index=True)
 
     plotContinentCases(dfToday)
     plotCountriesTopCases(dfToday)
     plotContinentCountriesCases(dfToday)
-    plotCountryCases(dfToday, countriesPath)
+    plotCountryCases(dfToday, gSaveCountryData)
 
 
 def plotData(df, title='', kind='line', y=None, fName='', logy=False,
              save=True, show=True, left=0.1, bottom=0.14, top=0.92,
-             color='#1f77b4', grid=False, figsize=None):
-    # fontsize = 4
-    if figsize:
-        ax = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
-                     logy=logy, figsize=figsize, xlabel='', ylabel='')
-    else:
-        ax = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
-                     logy=logy, xlabel='', ylabel='')
+             color='#1f77b4', grid=False, figsize=None, fontsize=9):
 
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-    # plt.setp(ax.get_yticklabels()) #fontsize=fontsize
+    if figsize:
+        fig = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
+                     logy=logy, figsize=figsize, xlabel='', ylabel='', fontsize=fontsize)
+    else:
+        fig = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
+                     logy=logy, xlabel='', ylabel='', fontsize=fontsize)
+
+    fig.axes.title.set_size(fontsize + 1)
+
+    plt.setp(fig.get_xticklabels(), rotation=30, ha="right")
+    # plt.setp(fig.get_yticklabels())
     # plt.tight_layout()
     plt.subplots_adjust(left=left, bottom=bottom, right=0.96, top=top, wspace=None, hspace=None)
     if save:
@@ -100,7 +99,7 @@ def read_csv(file):
     return df
 
 
-def getAllOurWorldNew(csvpath=r'./dataCountry/'):
+def getAllOurWorldNew(csvpath=gSaveCountryData):
     def getCountryNewestLine(file):
         # country = get_file_names(file)[0]
         # print('country=', country)
@@ -170,25 +169,25 @@ def plotCountryCases(dfToday, path):
     columnLabel = 'total_cases'
     dfData = getTopDataCountries(df, top, columnLabel)
     title = 'Top ' + str(top) + ' Confirmed' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_Confirmed.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_Confirmed.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     columnLabel = 'total_deaths'
     dfData = getTopDataCountries(df, top, columnLabel)
     title = 'Top ' + str(top) + ' Deaths' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_Deaths.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_Deaths.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     columnLabel = 'new_deaths'
     dfData = getTopDataCountries(df, top, columnLabel)
     title = 'Top ' + str(top) + ' New Deaths' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_NewDeaths.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_NewDeaths.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     columnLabel = 'new_cases'
     dfData = getTopDataCountries(df, top, columnLabel)
     title = 'Top ' + str(top) + ' New Cases' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_NewConfirmed.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_NewConfirmed.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     dfContinent = dfToday[dfToday['continent'].isnull()]  # remain  continent
@@ -201,13 +200,13 @@ def plotCountryCases(dfToday, path):
     columnLabel = 'new_deaths'
     dfData = getTopDataCountries(dfContinent, -1, columnLabel)
     title = 'Continent New Deaths' + get_datetime_str()
-    fileName = gSaveBasePath + 'continent_NewDeaths.png'
+    fileName = os.path.join(gSaveBasePath, 'continent_NewDeaths.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     columnLabel = 'new_cases'
     dfData = getTopDataCountries(dfContinent, -1, columnLabel)
     title = 'Continent New Cases' + get_datetime_str()
-    fileName = gSaveBasePath + 'continent_NewConfirmed.png'
+    fileName = os.path.join(gSaveBasePath, 'continent_NewConfirmed.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     columnLabel = 'mortality'
@@ -215,12 +214,12 @@ def plotCountryCases(dfToday, path):
     '''
     dfData = getTopDataCountries(df, top, columnLabel)
     title = 'Top ' + str(top) + ' mortality' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_Mortality.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_Mortality.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     dfData = getTopDataCountries(df, top, columnLabel, ascend=True)
     title = 'Top ' + str(top) + ' lowest mortality' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_MortalityLow.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_MortalityLow.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
     '''
 
@@ -228,7 +227,7 @@ def plotCountryCases(dfToday, path):
                  'South Korea', 'Japan', 'New Zealand']
     dfData = getDataCountries(df, countries)
     title = 'Typical countries' + ' mortality' + get_datetime_str()
-    fileName = gSaveBasePath + 'countries_MortalityTC.png'
+    fileName = os.path.join(gSaveBasePath, 'countries_MortalityTC.png')
     plotAll.append((columnLabel, dfData, title, fileName, days))
 
     for i, value in enumerate(plotAll):
@@ -241,7 +240,8 @@ def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60):
     plt.clf()
     ax = plt.subplot(1, 1, 1)
     print('title=', title)
-    ax.set_title(title)
+    fontsize = 9
+    ax.set_title(title, fontsize=fontsize + 1)
     # plt.title(title)
     for country, df in dfAll:
         df.set_index(["date"], inplace=True)
@@ -252,9 +252,9 @@ def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60):
         # inter = 12
         # y = y[::inter]
 
-        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]  # recent 30 days
+        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]  # recent days
         # plotCountryAx(ax,y.index, y, label=country)
-        plotDataAx(ax, y.index, y[coloumnLabel], label=country, fontsize=MEDIUM_SIZE)
+        plotDataAx(ax, y.index, y[coloumnLabel], label=country, fontsize=fontsize)
         # break
 
     plt.ylim(0)
@@ -432,21 +432,23 @@ def plotContinentCountriesCases(df):
 
     print('plotAll len=', len(plotAll))
 
+    fontsize = 10
     nrow = 2
     ncol = 3
     title = 'Continent today\'s new cases(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     fig, axes = plt.subplots(nrow, ncol, figsize=(9, 6))
-    fig.suptitle(title)  # fontsize=10
+    fig.suptitle(title, fontsize=fontsize + 1)  #
     for i, value in enumerate(plotAll):
         columnLabel, dfData, kind, title, color = value
 
         ax = dfData.plot(ax=axes[i // ncol, i % ncol], kind=kind, title=title, y=[columnLabel],
-                         color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='')
+                         color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='', fontsize=fontsize)
+        ax.axes.title.set_size(fontsize)
         plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
         plt.tight_layout()
 
-    fileName = gSaveBasePath + 'continentTopCountries_NewCases' + '.png'
+    fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewCases.png')
     plt.savefig(fileName)
 
     plotAll = []
@@ -462,17 +464,18 @@ def plotContinentCountriesCases(df):
 
     title = 'Continent today\'s new deaths(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     fig, axes = plt.subplots(nrow, ncol, figsize=(9, 6))
-    fig.suptitle(title, fontsize=10)
+    fig.suptitle(title, fontsize=fontsize + 1)
     for i, value in enumerate(plotAll):
         columnLabel, dfData, kind, title, color = value
 
         ax = dfData.plot(ax=axes[i // ncol, i % ncol], kind=kind, title=title, y=[columnLabel],
-                         color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='')
+                         color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='', fontsize=fontsize)
+        ax.axes.title.set_size(fontsize)
         plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
         plt.tight_layout()
 
-    fileName = gSaveBasePath + 'continentTopCountries_NewDeaths' + '.png'
+    fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewDeaths.png')
     plt.savefig(fileName)
     plt.show()
 
@@ -495,27 +498,27 @@ def plotWorldCases(df):
 
     title = 'World Cases,' + get_datetime_str()
     y = ['total_cases']
-    fileName = gSaveBasePath + 'World_Cases.png'
+    fileName = os.path.join(gSaveBasePath, 'World_Cases.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
 
     title = 'World New Cases,' + get_datetime_str()
     y = ['new_cases']
-    fileName = gSaveBasePath + 'World_NewCases.png'
+    fileName = os.path.join(gSaveBasePath, 'World_NewCases.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
 
     title = 'World Deaths,' + get_datetime_str()
     y = ['total_deaths']
-    fileName = gSaveBasePath + 'World_Deaths.png'
+    fileName = os.path.join(gSaveBasePath, 'World_Deaths.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
 
     title = 'World New Deaths,' + get_datetime_str()
     y = ['new_deaths']
-    fileName = gSaveBasePath + 'World_NewDeaths.png'
+    fileName = os.path.join(gSaveBasePath, 'World_NewDeaths.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
 
     title = 'World Mortality,' + get_datetime_str()
     y = ['mortality']
-    fileName = gSaveBasePath + 'World_Mortality.png'
+    fileName = os.path.join(gSaveBasePath, 'World_Mortality.png')
     plotData(df, title=title, kind='line', y=y, fName=fileName, show=False, figsize=(8, 5), color='r', grid=True)
 
     newRecentDays = 60
@@ -524,18 +527,18 @@ def plotWorldCases(df):
 
     title = 'World Recent {} New Cases,'.format(strRecent) + get_datetime_str()
     y = ['new_cases']
-    fileName = gSaveBasePath + 'World_RecentNewCases.png'
+    fileName = os.path.join(gSaveBasePath, 'World_RecentNewCases.png')
     plotData(dfWorldNew, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
 
     title = 'World Recent {} New Deaths,'.format(strRecent) + get_datetime_str()
     y = ['new_deaths']
-    fileName = gSaveBasePath + 'World_RecentNewDeaths.png'
+    fileName = os.path.join(gSaveBasePath, 'World_RecentNewDeaths.png')
     plotData(dfWorldNew, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
     plt.show()
 
 
 def plotContinentCases(df):
-    def plotContienet(dfContinent, y, title, fileName, color):
+    def plotContienet(dfContinent, y, title, fileName, color, fontsize=9):
         if 0:
             plotData(dfContinent, title=title, kind='bar', y=y, fName=fileName, color=color, bottom=0.17, top=0.9)
         else:
@@ -548,20 +551,21 @@ def plotContinentCases(df):
             # y2 = dfContinent['total_deaths']
             # plt.bar(y1.index, y1, width=0.4) #bottom=0, color=color
             # plt.bar(y2.index, y2, width=0.4) #bottom=0, color=color
-            ax = dfContinent.plot(kind='barh', title=title, y=y, color=color,
-                                  figsize=(8, 5), ylabel='', xlabel='', fontsize=10)  # grid=True, logy=True
-            # ax.get_xaxis().set_visible(False)
-            ax.get_xaxis().tick_top()
+            fig = dfContinent.plot(kind='barh', title=title, y=y, color=color,
+                                  figsize=(8, 5), ylabel='', xlabel='', fontsize=fontsize)  # grid=True, logy=True
+            # fig.get_xaxis().set_visible(False)
+            fig.get_xaxis().tick_top()
+            fig.axes.title.set_size(fontsize + 1)
             the_table = plt.table(cellText=dfContinentTable.values,
                       rowLabels=dfContinentTable.index,
                       colLabels=dfContinentTable.columns,
                       loc='bottom')
             the_table.auto_set_font_size(False)
-            the_table.set_fontsize(10)
+            the_table.set_fontsize(fontsize)
             # the_table.scale(2, 2)
 
-            plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-            # plt.setp(ax.get_yticklabels()) #fontsize=fontsize
+            plt.setp(fig.get_xticklabels(), rotation=30, ha="right")
+            # plt.setp(fig.get_yticklabels()) #fontsize=fontsize
 
             plt.subplots_adjust(left=0.15, bottom=0.25, right=None, top=0.82, wspace=None, hspace=None)
             plt.tight_layout()
@@ -591,7 +595,7 @@ def plotContinentCases(df):
     wroldstr = 'World total cases:{}, total deaths:{}'.format(worldTotalCases, worldTotalDeaths)
     title = wroldstr + '\n' + get_datetime_str()
     y = ['total_cases', 'total_deaths']
-    fileName = gSaveBasePath + 'World_casesContinent.png'
+    fileName = os.path.join(gSaveBasePath, 'World_casesContinent.png')
     color = ['#1f77b4', 'red']
     dfContinent = dfContinent.sort_values(by=[y[0]], ascending=False)
     plotContienet(dfContinent, y, title, fileName, color)
@@ -599,7 +603,7 @@ def plotContinentCases(df):
     wroldstr = 'World new cases:{}, new deaths:{}'.format(worldNewCases, worldNewDeaths)
     title = wroldstr + '\n' + get_datetime_str()
     y = ['new_cases', 'new_deaths']
-    fileName = gSaveBasePath + 'World_newCasesContinent.png'
+    fileName = os.path.join(gSaveBasePath, 'World_newCasesContinent.png')
     dfContinent = dfContinent.sort_values(by=[y[0]], ascending=False)
     plotContienet(dfContinent, y, title, fileName, color)
 
@@ -631,7 +635,7 @@ def saveCountriesInfo(all):
         df = getCountryDayData(i, all)
         # print(df.head(5))
         df = getCountryNewCasesAndDeathsDf(df)
-        df.to_csv(gSaveCountryData + i + '.csv', index=True)
+        df.to_csv(os.path.join(gSaveCountryData, i + '.csv'), index=True)
         bar.update(k + 1)
 
 
@@ -707,7 +711,7 @@ def plotCountryInfo(all, column='Confirmed'):
         ax.set_yscale('log')
 
     # plt.xlim('2020-05-01', '2020-06-20')
-    plt.savefig(gSaveBasePath + 'countries_' + column + '.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'countries_' + column + '.png'))
     # plt.show()
 
 
@@ -756,7 +760,7 @@ def plotCountryInfo2(all, column='Confirmed'):
     # plt.tick_params(axis="both", which="both", bottom="off", top="off", labelbottom="on", left="off", right="off", labelleft="on")
     # ax.set_yscale('log')
     plt.tight_layout()
-    plt.savefig(gSaveBasePath + 'countries0_' + column + '.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'countries0_' + column + '.png'))
     # plt.show()
 
 
@@ -795,7 +799,7 @@ def plotCountryInfo3(all, column='Confirmed'):
     # plt.tick_params(axis="both", which="both", bottom="off", top="off", labelbottom="on", left="off", right="off", labelleft="on")
     # ax.set_yscale('log')
     plt.tight_layout()
-    plt.savefig(gSaveBasePath + 'countries1_' + column + '.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'countries1_' + column + '.png'))
     plt.show()
 
 
@@ -842,5 +846,4 @@ def getCountryDayData(country, allList):
 
 
 if __name__ == '__main__':
-    csvpath = r'./data/'
     plotCountriesFromOurWorld()

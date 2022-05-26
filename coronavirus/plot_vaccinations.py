@@ -11,10 +11,12 @@ import datetime
 # from numpy.core.numeric import NaN
 import pandas as pd
 import matplotlib.pyplot as plt
-from plot_cases import read_csv, gSaveBasePath
+from plot_cases import read_csv
 from plot_cases import get_datetime_str, plotData, getTopData
 from plot_cases import SMALL_SIZE
 from predict_cases import plotDataAx
+from predict_cases import gSaveBasePath, gDatasetPath
+
 from common_path import create_path, traverse_files  # get_file_name
 from common.get_html import download_webfile
 
@@ -40,23 +42,23 @@ def plotWorldVaccinations(df):
 
     title = 'World people vaccinated,' + get_datetime_str()
     y = ['people_vaccinated', 'people_fully_vaccinated']
-    fileName = gSaveBasePath + 'World_vaccinated.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccinated.png')
     color = ['#1f77b4', 'r']
     plotData(df, title=title, kind='line', y=y, fName=fileName, color=color, show=False)
 
     title = 'World vaccinated per hundred,' + get_datetime_str()
     y = ['people_vaccinated_per_hundred', 'people_fully_vaccinated_per_hundred']
-    fileName = gSaveBasePath + 'World_vaccinatedPerHundred.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccinatedPerHundred.png')
     plotData(df, title=title, kind='line', y=y, fName=fileName, color=color, show=False)
 
     title = 'World new vaccinated,' + get_datetime_str()
     y = ['new_vaccinations']
-    fileName = gSaveBasePath + 'World_vaccinatedNew.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccinatedNew.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False)
 
     title = 'World total vaccinated,' + get_datetime_str()
     y = ['total_vaccinations']
-    fileName = gSaveBasePath + 'World_vaccinatedTotal.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccinatedTotal.png')
     plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False)
     plt.show()
 
@@ -75,7 +77,7 @@ def plotVaccinationRankings(dfAll):
     dfData = dfCountries.iloc[:top, :]
     title = 'Top ' + str(top) + ' countries people vaccinated,' + get_datetime_str()
     y = ['people_vaccinated']
-    fileName = gSaveBasePath + 'World_vaccineRankingPeople.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccineRankingPeople.png')
     plotData(dfData, title=title, kind='bar', y=y, fName=fileName, show=False)
 
     # ----vaccinated peope per hundred ranking------
@@ -83,7 +85,7 @@ def plotVaccinationRankings(dfAll):
     dfData = dfCountries.iloc[:top, :]
     title = 'Top ' + str(top) + ' countries people vaccinated per hundred,' + get_datetime_str()
     y = ['people_vaccinated_per_hundred']
-    fileName = gSaveBasePath + 'World_vaccineRankingPeoplePerH.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccineRankingPeoplePerH.png')
     plotData(dfData, title=title, kind='bar', y=y, fName=fileName,
              color=['#1f77b4', 'r'], show=False)
     plt.show()
@@ -111,22 +113,23 @@ def plotVaccinationContinentCoutryRankings(dfAll):
 
         nrow = 2
         ncol = 3
+        fontsize = 9
         title = 'Continent contries rankings by ' + columnLabel + ',' + get_datetime_str()
         fig, axes = plt.subplots(nrow, ncol, figsize=(9, 6))
-        fig.suptitle(title, fontsize=10)
+        fig.suptitle(title, fontsize=fontsize + 1)
         for i, value in enumerate(plotAll):
             columnLabel, dfData, kind, title, color = value
 
             ax = dfData.plot(ax=axes[i // ncol, i % ncol], kind=kind, title=title,
                              y=[columnLabel], color=color, grid=False, logy=False,
-                             legend=False, xlabel='', ylabel='')
+                             legend=False, xlabel='', ylabel='', fontsize=fontsize)
+            ax.axes.title.set_size(fontsize)
             plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
             plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
                                 wspace=None, hspace=None)
             plt.tight_layout()
 
-        fileName = gSaveBasePath + name
-        plt.savefig(fileName)
+        plt.savefig(os.path.join(gSaveBasePath, name))
 
     # print(dfAll.head())
     dfWorld = dfAll[dfAll['continent'].isnull()]  # dfAll.loc['World']
@@ -152,12 +155,12 @@ def plotContinentVaccinations(dfAll):
     dfContinent.set_index(["location"], inplace=True)
     title = 'Continent vaccinated,' + get_datetime_str()
     y = ['people_vaccinated_per_hundred', 'people_fully_vaccinated_per_hundred']
-    fileName = gSaveBasePath + 'World_vaccineContinent.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccineContinent.png')
     plotData(dfContinent, title=title, kind='bar', y=y, fName=fileName,
              bottom=0.16, color=['#1f77b4', 'r'], show=False)
 
 
-def saveCountryVaccData(vaccineFile, path=r'./OurWorld/vaccineCountry'):
+def saveCountryVaccData(vaccineFile, path):
     df = read_csv(vaccineFile)
     df = df[df['location'] != 'World']
     countries = list(df.location.unique())
@@ -236,9 +239,6 @@ def InterpolationDf(dateIndex, df):
             # df.iloc[i] = df.iat[i - 1]
             # print(df.iloc[i])
 
-    # df.to_csv(os.path.join(r'./OurWorld', 'test.csv'), index=True)
-    # print('before df=\n', df, df.shape)
-
     # print('dateIndex=', dateIndex, len(dateIndex), type(dateIndex)) # 06/06/2021
     indexFmt = '%#m/%#d/%y'
     if '-' in df.keys()[0]:
@@ -288,8 +288,6 @@ def InterpolationDf(dateIndex, df):
     # pd.to_datetime(df.index, infer_datetime_format=True)
     df.index = pd.to_datetime(df.index)
     df.sort_index(inplace=True)
-    # df.to_csv(os.path.join(r'./OurWorld', 'test2.csv'), index=True)
-    # print('keys=', df.keys(),len(df.keys()))
     return df
 
 
@@ -309,8 +307,8 @@ def plotConuntryVaccinationsByTime(path, dfCountries, coloumnLabel, title, fileN
 
     plt.clf()
     ax = plt.subplot(1, 1, 1)
-
-    plt.title(title)
+    fontsize = 9
+    ax.set_title(title, fontsize=fontsize + 1)
     for country, df in dfAll:
         df.set_index(["date"], inplace=True)
         y = df[coloumnLabel]
@@ -323,7 +321,7 @@ def plotConuntryVaccinationsByTime(path, dfCountries, coloumnLabel, title, fileN
         y = y[[(i % inter == 0) for i in range(len(y.index))]]
         # print('type(y), type(xIndex)=', type(y), y.shape, type(xIndex),len(xIndex))
 
-        plotDataAx(ax, y.index, y, country, fontsize=SMALL_SIZE)
+        plotDataAx(ax, y.index, y, country, fontsize=fontsize)
         # break
 
     plt.ylim(0)
@@ -333,7 +331,7 @@ def plotConuntryVaccinationsByTime(path, dfCountries, coloumnLabel, title, fileN
         plt.show()
 
 
-def plotConuntryVaccinations(vaccPath=r'./OurWorld/vaccineCountry'):
+def plotConuntryVaccinations(vaccPath):
     def getCountryNewestLine(file):
         # country = get_file_name(file)[len('vaccination_'):-4]
         # print('country=', country)
@@ -378,14 +376,14 @@ def plotConuntryVaccinations(vaccPath=r'./OurWorld/vaccineCountry'):
     # dfCountries = dfAll[dfAll['location'] == 'Saint Helena' ]
     # print('dfCountries=\n', dfCountries)
 
-    fileName = gSaveBasePath + 'World_vaccinePerH_top.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccinePerH_top.png')
     title = 'Top ' + str(top) + ' countries vaccinated per hundred,' + get_datetime_str()
     columnLabel = 'people_vaccinated_per_hundred'
     plotConuntryVaccinationsByTime(vaccPath, dfCountries, columnLabel, title, fileName)
 
     dfAll = dfAll.sort_values(by=['people_fully_vaccinated_per_hundred'], ascending=False)
     dfCountries = dfAll.iloc[:top, :]
-    fileName = gSaveBasePath + 'World_vaccineFully_top.png'
+    fileName = os.path.join(gSaveBasePath, 'World_vaccineFully_top.png')
     title = 'Top ' + str(top) + ' countries vaccinated fully,' + get_datetime_str()
     columnLabel = 'people_fully_vaccinated_per_hundred'
     plotConuntryVaccinationsByTime(vaccPath, dfCountries, columnLabel, title, fileName)
@@ -395,7 +393,7 @@ def plotConuntryVaccinations(vaccPath=r'./OurWorld/vaccineCountry'):
     # print(dfAll.head())
     dfCountries = dfAll.dropna(subset=['continent'])  # remove continent only remain countries
     dfCountries = dfCountries.iloc[:top, :]
-    fileName = gSaveBasePath + 'World_peopleVaccined_top.png'
+    fileName = os.path.join(gSaveBasePath, 'World_peopleVaccined_top.png')
     title = 'Top ' + str(top) + ' countries people vaccinated,' + get_datetime_str()
     columnLabel = 'people_vaccinated'
     plotConuntryVaccinationsByTime(vaccPath, dfCountries, columnLabel, title, fileName)
@@ -410,18 +408,18 @@ def plotConuntryVaccinations(vaccPath=r'./OurWorld/vaccineCountry'):
 
     dfCountries = dfAll[dfAll.location.isin(observeCountries)]
 
-    fileName = gSaveBasePath + 'World_peopleVaccined_topCasesCountries.png'
+    fileName = os.path.join(gSaveBasePath, 'World_peopleVaccined_topCasesCountries.png')
     title = 'Top countries people vaccinated,' + get_datetime_str()
     columnLabel = 'people_vaccinated'
     plotConuntryVaccinationsByTime(vaccPath, dfCountries, columnLabel, title, fileName)
 
-    fileName = gSaveBasePath + 'World_peopleVaccinedPerH_topCasesCountries.png'
+    fileName = os.path.join(gSaveBasePath, 'World_peopleVaccinedPerH_topCasesCountries.png')
     title = 'Top countries people vaccinated per hundred,' + get_datetime_str()
     columnLabel = 'people_vaccinated_per_hundred'
     plotConuntryVaccinationsByTime(vaccPath, dfCountries, columnLabel, title, fileName)
 
 
-def downloadOurWorldData(csvpath=r'./OurWorld/'):
+def downloadOurWorldData(csvpath=gDatasetPath):
     create_path(csvpath)
     file = os.path.join(csvpath, 'owid-covid-data.csv')
     download_webfile(COVID_CSV, file)
@@ -445,14 +443,13 @@ def getVaccinesFile(file, dstVaccineFile):
 
 
 def startPlotVaccination():
-    path = r'./OurWorld/'
+    path = gDatasetPath
     file = os.path.join(path, 'owid-covid-data.csv')
     vaccineFile = os.path.join(path, 'vaccinations.csv')
     vaccCountryPath = os.path.join(path, 'vaccineCountry')
-    create_path(vaccCountryPath)
 
     getVaccinesFile(file, vaccineFile)
-    saveCountryVaccData(vaccineFile)
+    saveCountryVaccData(vaccineFile, vaccCountryPath)
 
     df = read_csv(vaccineFile)
     plotWorldVaccinations(df)

@@ -22,11 +22,11 @@ from json_update import get_datetime
 from common_path import traverse_files, create_path
 # plt.rcParams['savefig.dpi'] = 300 #matplot figure quality when save
 
-
-gSaveBasePath = r'..\images\\'
-gSaveChangeData = r'.\dataChange\\'
-gSaveCountryData = r'.\dataCountry\\'
-gSavePredict = r'.\dataPredict\\'
+gDatasetPath = r'.\data\OurWorld'
+gSaveBasePath = r'..\images'
+gSaveChangeData = r'.\data\dataChange'
+gSaveCountryData = r'.\data\dataCountry'
+gSavePredict = r'.\data\dataPredict'
 
 
 gScaler = MinMaxScaler()  #StandardScaler()
@@ -42,7 +42,7 @@ def binaryDf(df, labelAdd=True):
             newIndex.append(str(df.index[i * 2]) + ',' + str(df.index[i * 2 + 1]))  # combine
         else:
             newIndex.append(df.index[i * 2])  # drop
-            
+
         newdf = pd.concat([newdf, dd], ignore_index=True)
 
     # print('newIndex=',len(newIndex))
@@ -74,7 +74,7 @@ def create_dataset(dataset, look_back=1):
     return np.array(dataX), np.array(dataY)
 
 
-def get_dataset(file=r'.\OurWorld\owid-covid-data.csv'):
+def get_dataset(file):
     if not os.path.exists(file):
         print('Data file is not exist, please run main_v1.3.py to get it first.')
         return None
@@ -101,15 +101,15 @@ def get_dataset(file=r'.\OurWorld\owid-covid-data.csv'):
 def plotDataAx(ax, x, y, label='', fontsize=5, color=None):
     ax.plot(x, y, label=label, color=color)
     # ax.set_aspect(1)
-    ax.legend()
+    ax.legend(fontsize=fontsize)
     plt.setp(ax.get_xticklabels(), rotation=30, ha="right", fontsize=fontsize, fontweight=10)
     plt.setp(ax.get_yticklabels(), fontsize=fontsize)
     plt.subplots_adjust(left=0.02, bottom=0.09, right=0.99, top=0.92, wspace=None, hspace=None)
 
 
 def predictFuture(model, start, Number=5):
-    print('---------------future---------')
-    print('start=', start)
+    # print('---------------future---------')
+    # print('start=', start)
     # print(start.shape,'startval:', gScaler.inverse_transform(start.reshape(1, -1)))
     start = np.array([start]).reshape(1, 1, 1)
     result = []
@@ -119,10 +119,10 @@ def predictFuture(model, start, Number=5):
         # print(nextPred)
         result.append(nextPred.flatten()[0])
         start = nextPred
-    print('predict value=', result)
+    # print('predict value=', result)
     result = gScaler.inverse_transform(np.array(result).reshape(1, -1)).flatten()
     result = list(map(int, result))
-    print('after inverse redict value=', result)
+    # print('after inverse redict value=', result)
     return result
 
 
@@ -147,15 +147,15 @@ def plotPredictCompare(model, trainX, index, data):
     pre_y = trainPredict[offset + 1:-1]
     index_x = index[offset + 2: offset + 2 + len(pre_y)]
     plotDataAx(ax, index_x, pre_y, 'Prediction')
-    plt.savefig(gSaveBasePath + 'WorldPredictCompare.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'WorldPredictCompare.png'))
     plt.show()
 
 
-def changeNewIndexFmt(newIndex):
+def changeNewIndexFmt(newIndex, src_fmt='%d/%m/%Y', dst_fmt='%Y-%m-%d'):
     new = []
     for i in newIndex:
-        i = datetime.datetime.strptime(i, '%m/%d/%Y')
-        i = datetime.datetime.strftime(i, '%Y-%m-%d')  # '%b %d, %Y'
+        i = datetime.datetime.strptime(i, src_fmt)
+        i = datetime.datetime.strftime(i, dst_fmt)  # '%b %d, %Y'
         new.append(i)
     return new
 
@@ -166,18 +166,18 @@ def plotPredictFuture(model, trainY, index, data):
     print('predict start date:', index[-1])
 
     startIndex = index[-1]
-    # sD=datetime.datetime.strptime(startIndex,'%b %d, %Y')
-    fmt = '%m/%d/%y'
+    fmt = '%d/%m/%y'
     if '-' in startIndex:
         fmt = '%Y-%m-%d'
     sD = datetime.datetime.strptime(startIndex, fmt)  # '%Y-%m-%d'
 
     newIndex = []
-    startIndex = datetime.datetime.strftime(sD, '%m/%d/%Y')
+    # dst_fmt = '%d/%m/%Y'
+    startIndex = datetime.datetime.strftime(sD, fmt)
     newIndex.append(startIndex)
     for i in range(Number):
         d = sD + datetime.timedelta(days=i + 1)
-        d = datetime.datetime.strftime(d, '%m/%d/%Y')
+        d = datetime.datetime.strftime(d, fmt)
         # print(d)
         newIndex.append(d)
     print('predict period:', newIndex)
@@ -189,27 +189,27 @@ def plotPredictFuture(model, trainY, index, data):
     for i in range(1, df.shape[0]):
         df.iloc[i, 2] = df.iloc[i, 1] - df.iloc[i - 1, 1]
 
-    print('table:', df)
+    print('table:\n', df)
 
-    startIndex = datetime.datetime.strptime(startIndex, '%m/%d/%Y')
+    startIndex = datetime.datetime.strptime(startIndex, fmt)
     predictTime = datetime.datetime.strftime(startIndex, '%Y-%m-%d')
-    df.to_csv(gSavePredict + predictTime + '_predict.csv', index=True)
+    file = os.path.join(gSavePredict, predictTime + '_predict.csv')
+    df.to_csv(file, index=True)
 
     offset = 150  # 70 120
     # plt.figure(figsize=(8, 6))
-    plt.title('Future ' + str(Number) + ' days Covid-19,' + ' Prediction time: ' + get_datetime())
+    plt.title('Future ' + str(Number) + ' days Covid-19,' + ' Predicted time: ' + get_datetime())
 
     ax = plt.gca()
     # ax = plt.subplot(1, 1, 1)
     plotDataAx(ax, index[offset:], data[offset:], 'Now cases')
 
-    newIndex = changeNewIndexFmt(newIndex)
+    newIndex = changeNewIndexFmt(newIndex, fmt)
     plotDataAx(ax, newIndex, pred, 'Predicted cases')
     # print('oldIndex=', index[offset:])
     # print('newIndex=', newIndex)
 
-    # ax.table(cellText=df.values, colLabels=df.columns, loc='center') #,clip_box=[[0,5],[0+100,5+100]]
-    tb = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center')
+    tb = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='left')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(df.columns)))
@@ -217,7 +217,7 @@ def plotPredictFuture(model, trainY, index, data):
     tb.auto_set_column_width(col=colList)
 
     # plt.axis('off')
-    plt.savefig(gSaveBasePath + 'WorldFuturePredict.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'WorldFuturePredict.png'))
     plt.show()
 
 
@@ -268,12 +268,8 @@ def prepareDataset(dataset, look_back):
     # print('X =', X[:5])
     # print('Y =', Y[:5])
 
-    # X = np.reshape(X, (X.shape[0], 1,  X.shape[1]))
-    # X = np.reshape(X, (X.shape[0], 1))
-
     print('X.shape =', X.shape)
     print('Y.shape =', Y.shape)
-
     # x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=12)
     return X, Y, index, rawdata
 
@@ -299,13 +295,12 @@ def train(dataset, first=False, look_back=1):
         model.optimizer.learning_rate = lr  # 1e-5
 
     model.summary()
-    model.fit(x_train, y_train, epochs=200, batch_size=16, verbose=1)  # epochs=500 verbose=2
+    model.fit(x_train, y_train, epochs=150, batch_size=16, verbose=1)  # verbose=2
 
     model.save(pre_train_path)
     # a = np.array([trainY[-1]]).reshape(-1,1,1)
     # #a = np.array([[0.88964097]]).reshape(-1,1,1)
     # #a = np.array([0.6]).reshape(1,1,1)
-    # print(a)
     # print('predict=', model.predict(a))
 
     # -----------------start plot--------------- #
@@ -328,7 +323,10 @@ def evaulate_predition(df, file):
             # d = datetime.datetime.strptime(d,'%b %d, %Y')
             d = datetime.datetime.strptime(d, '%Y-%m-%d')
             # print('day=', day)
-            date = datetime.datetime.strptime(day, '%m/%d/%Y')
+            if '-' not in day:
+                date = datetime.datetime.strptime(day, '%m/%d/%Y')
+            else:
+                date = datetime.datetime.strptime(day, '%Y-%m-%d')
             # print(d, date, cases)
             if date == d:
                 return cases
@@ -337,8 +335,8 @@ def evaulate_predition(df, file):
     dfPredict = getPredictDf(file)
     predictTime = file[file.rfind('\\') + 1: file.rfind('_')]
 
-    # print(dfPredict)
-    print('predictTime=', predictTime)
+    # print('dfPredict=\n', dfPredict)
+    # print('predictTime=', predictTime)
     allCases = np.zeros((dfPredict.shape[0],))
     accs = np.zeros((dfPredict.shape[0],))
     for i in range(dfPredict.shape[0]):
@@ -346,8 +344,9 @@ def evaulate_predition(df, file):
         # predictCase = dfPredict.iloc[i,1]
         date = dfPredict.loc[i]['Date']
         predictCase = dfPredict.loc[i]['Predicted cases']
-        cases = getTrueCases(date, df)
+
         acc = 0
+        cases = getTrueCases(date, df)
         if cases != 0:
             acc = round((1 - (np.abs(cases - predictCase) / cases)) * 100, 3)
 
@@ -359,13 +358,18 @@ def evaulate_predition(df, file):
     dfPredict['Cases'] = allCases
     dfPredict['Precision'] = accs
     dfPredict = dfPredict.iloc[:, 1:]  # remove index number column
-    # print(dfPredict)
+
     dfPredict.Cases = dfPredict.Cases.astype('int64')
+
+    if '-' not in dfPredict['Date'].values[0]:  # 05/09/2022 ==> 2022-04-29
+        newDates = changeNewIndexFmt(dfPredict['Date'].values, '%m/%d/%Y')
+        dfPredict.loc[:,'Date'] = newDates
+        # print('dfPredict=\n', dfPredict)
 
     # plt.figure(figsize=(8,6))
     title = 'Prediction Precision\n' + 'PredictTime: ' + predictTime + ' CheckTime: ' + get_datetime()
     plt.title(title, fontsize=9)
-    tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='center')
+    tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='left')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(dfPredict.columns)))
@@ -373,7 +377,7 @@ def evaulate_predition(df, file):
     tb.auto_set_column_width(col=colList)
 
     plt.axis('off')
-    plt.savefig(gSaveBasePath + 'WorldFuturePredictPrecise.png')
+    plt.savefig(os.path.join(gSaveBasePath, 'WorldFuturePredictPrecise.png'))
     plt.show()
 
 
@@ -393,18 +397,19 @@ def getNewestFile(path, fmt='csv', index=-1):
 
 
 def predict(data):
-    create_path(gSavePredict)
-
     train(data)
 
-    file = getNewestFile(gSavePredict, index=-4)
+    file = getNewestFile(gSavePredict, index=-3)
     print('Last predicted file:', file)
     evaulate_predition(data, file)
 
 
 def main():
     print('\nTensorflow version: ', tf.version.VERSION)
-    data = get_dataset()
+    create_path(gSavePredict)
+
+    file = os.path.join(gDatasetPath, 'owid-covid-data.csv')
+    data = get_dataset(file)
     if data is not None:
         predict(data)
 

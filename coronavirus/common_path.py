@@ -36,7 +36,7 @@ def traverse_files(path, filters='', sub_folder=False):
     if fmts:
         for dirpath, dirnames, filenames in os.walk(path):
             filenames.sort()
-            print('filenames=', filenames)
+            # print('filenames=', filenames)
             for filename in filenames:
                 if getExtFile(get_file_names(filename)[1]) in fmts:
                     yield os.path.join(dirpath, filename)

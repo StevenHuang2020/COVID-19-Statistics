@@ -89,28 +89,28 @@ def parseConfirmed(df):
     dfSex = pd.DataFrame()
     for i in Sex:
         line = pd.DataFrame([[i, df[df['Sex'] == i].shape[0]]], columns=columns)
-        dfSex = pd.concat([dfSex,line], ignore_index=True)
+        dfSex = pd.concat([dfSex, line], ignore_index=True)
     dfSex.set_index(["Gender"], inplace=True)
 
     columns = ['Group', 'Number']
     dfAgeGroup = pd.DataFrame()
     for i in AgeGroup:
         line = pd.DataFrame([[i, df[df['Age group'] == i].shape[0]]], columns=columns)
-        dfAgeGroup = pd.concat([dfAgeGroup,line], ignore_index=True)
+        dfAgeGroup = pd.concat([dfAgeGroup, line], ignore_index=True)
     dfAgeGroup.set_index(["Group"], inplace=True)
 
     columns = ['DHB', 'Number']
     dfDHB = pd.DataFrame()
     for i in DHB:
         line = pd.DataFrame([[i, df[df['DHB'] == i].shape[0]]], columns=columns)
-        dfDHB = pd.concat([dfDHB,line], ignore_index=True)
+        dfDHB = pd.concat([dfDHB, line], ignore_index=True)
     dfDHB.set_index(["DHB"], inplace=True)
 
     columns = ['Overseas', 'Number']
     dfbOverseas = pd.DataFrame()
     for i in bOverseas:
         line = pd.DataFrame([[i, df[df['Overseas travel'] == i].shape[0]]], columns=columns)
-        dfbOverseas = pd.concat([dfbOverseas,line], ignore_index=True)
+        dfbOverseas = pd.concat([dfbOverseas, line], ignore_index=True)
     dfbOverseas.set_index(["Overseas"], inplace=True)
 
     # dfSex = dfSex.sort_values(by=0, axis=1) #dfSex.sort_values(by=['Female'], ascending=False)
@@ -200,7 +200,7 @@ def plotNZDataChange(df):
         # print(d, number)
         s += number
         line = pd.DataFrame([[d, number, s]], columns=columns)
-        dfStat = pd.concat([dfStat,line], ignore_index=True)
+        dfStat = pd.concat([dfStat, line], ignore_index=True)
 
     now = datetime.datetime.now()
     today = str(' Date:') + str(now.strftime("%Y-%m-%d %H:%M:%S"))

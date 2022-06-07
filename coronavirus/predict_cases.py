@@ -9,10 +9,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.utils import shuffle
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # not print tf debug info
-
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # from sklearn.model_selection import train_test_split, cross_val_score
+
+# plt.rcParams['savefig.dpi'] = 300 #matplot figure quality when save
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # not print tf debug info
+
 import tensorflow as tf
 from tensorflow.keras.layers import Dense, LSTM, Dropout, BatchNormalization
 from tensorflow.keras.models import Sequential
@@ -20,7 +22,6 @@ from tensorflow.keras import optimizers, initializers
 
 from json_update import get_datetime
 from common_path import traverse_files, create_path
-# plt.rcParams['savefig.dpi'] = 300 #matplot figure quality when save
 
 gDatasetPath = r'.\data\OurWorld'
 gSaveBasePath = r'..\images'
@@ -29,7 +30,7 @@ gSaveCountryData = r'.\data\dataCountry'
 gSavePredict = r'.\data\dataPredict'
 
 
-gScaler = MinMaxScaler()  #StandardScaler()
+gScaler = MinMaxScaler()  # StandardScaler()
 
 
 def binaryDf(df, labelAdd=True):
@@ -47,7 +48,7 @@ def binaryDf(df, labelAdd=True):
 
     # print('newIndex=',len(newIndex))
     # print('newdf.shape=',newdf.shape)
-    newdf.columns=df.columns
+    newdf.columns = df.columns
     newdf.index = newIndex
     return newdf
 
@@ -338,7 +339,7 @@ def evaulate_predition(df, file):
     # print('dfPredict=\n', dfPredict)
     # print('predictTime=', predictTime)
     allCases = np.zeros((dfPredict.shape[0],))
-    accs = np.zeros((dfPredict.shape[0],))
+    accs = []
     for i in range(dfPredict.shape[0]):
         # date = dfPredict.iloc[i,0]
         # predictCase = dfPredict.iloc[i,1]
@@ -349,12 +350,15 @@ def evaulate_predition(df, file):
         cases = getTrueCases(date, df)
         if cases != 0:
             acc = round((1 - (np.abs(cases - predictCase) / cases)) * 100, 3)
+            acc = format(acc, '.3f')
 
         # print(date,predictCase)
         # print(date,predictCase,cases)
-        accs[i] = acc
+
+        accs.append(acc)
         allCases[i] = cases
         # break
+
     dfPredict['Cases'] = allCases
     dfPredict['Precision'] = accs
     dfPredict = dfPredict.iloc[:, 1:]  # remove index number column
@@ -363,7 +367,7 @@ def evaulate_predition(df, file):
 
     if '-' not in dfPredict['Date'].values[0]:  # 05/09/2022 ==> 2022-04-29
         newDates = changeNewIndexFmt(dfPredict['Date'].values, '%m/%d/%Y')
-        dfPredict.loc[:,'Date'] = newDates
+        dfPredict.loc[:, 'Date'] = newDates
         # print('dfPredict=\n', dfPredict)
 
     # plt.figure(figsize=(8,6))

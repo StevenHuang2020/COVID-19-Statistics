@@ -30,7 +30,7 @@ def traverse_files(path, filters='', sub_folder=False):
     """
 
     def getExtFile(file):
-        return file[file.find('.')+1:]
+        return file[file.find('.') + 1:]
 
     fmts = filters.split()
     if fmts:

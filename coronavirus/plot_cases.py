@@ -48,20 +48,20 @@ def get_datetime_str():
     return str(' Date:') + get_datetime()
 
 
-def plotCountriesFromOurWorld(csvpath = gDatasetPath):  # From ourworld data
+def plotCountriesFromOurWorld(csvpath=gDatasetPath, show=True):  # From ourworld data
     saveCountriesInfoFromCsv(csvpath)
 
     casesFile = os.path.join(csvpath, 'cases.csv')
     df = read_csv(casesFile)
-    plotWorldCases(df)
+    plotWorldCases(df, show)
 
     dfToday = getAllOurWorldNew()
-    dfToday.to_csv(os.path.join(csvpath, 'today.csv'),index=True)
+    dfToday.to_csv(os.path.join(csvpath, 'today.csv'), index=True)
 
-    plotContinentCases(dfToday)
-    plotCountriesTopCases(dfToday)
-    plotContinentCountriesCases(dfToday)
-    plotCountryCases(dfToday, gSaveCountryData)
+    plotContinentCases(dfToday, show)
+    plotCountriesTopCases(dfToday, show)
+    plotContinentCountriesCases(dfToday, show)
+    plotCountryCases(dfToday, gSaveCountryData, show)
 
 
 def plotData(df, title='', kind='line', y=None, fName='', logy=False,
@@ -70,10 +70,10 @@ def plotData(df, title='', kind='line', y=None, fName='', logy=False,
 
     if figsize:
         fig = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
-                     logy=logy, figsize=figsize, xlabel='', ylabel='', fontsize=fontsize)
+                      logy=logy, figsize=figsize, xlabel='', ylabel='', fontsize=fontsize)
     else:
         fig = df.plot(kind=kind, title=title, y=y, color=color, grid=grid,
-                     logy=logy, xlabel='', ylabel='', fontsize=fontsize)
+                      logy=logy, xlabel='', ylabel='', fontsize=fontsize)
 
     fig.axes.title.set_size(fontsize + 1)
 
@@ -112,11 +112,11 @@ def getAllOurWorldNew(csvpath=gSaveCountryData):
 
         if not df.empty:
             # print('df=', df.head())
-            if df.shape[0]>1:
+            if df.shape[0] > 1:
                 newestLine = df.iloc[[-1]]
                 # print("newestLine=\n", newestLine);
-                if np.isnan(newestLine['total_cases'][0]): # filter the last line not equal to 0
-                    if df.shape[0]>2:
+                if np.isnan(newestLine['total_cases'][0]):  # filter the last line not equal to 0
+                    if df.shape[0] > 2:
                         newestLine = df.iloc[[-2]]
                         return newestLine
                 return newestLine
@@ -134,7 +134,7 @@ def getAllOurWorldNew(csvpath=gSaveCountryData):
         # print('fileCountry=', fileCountry, continent)
 
         # if continent in continents:
-            # print('continents=', fileCountry, line['total_cases'][0])
+        #     print('continents=', fileCountry, line['total_cases'][0])
 
         if line is not None:
             dfAll.append(line)
@@ -147,7 +147,7 @@ def getAllOurWorldNew(csvpath=gSaveCountryData):
     return dfAll
 
 
-def plotCountryCases(dfToday, path):
+def plotCountryCases(dfToday, path, show=True):
     def getTopDataCountries(df, top, columnLabel, ascend=False):
         df = df.sort_values(by=[columnLabel], ascending=ascend)
         dfData = df.iloc[:top, :]  # [df.columns.get_loc(columnLabel)]
@@ -233,10 +233,10 @@ def plotCountryCases(dfToday, path):
     for i, value in enumerate(plotAll):
         columnLabel, dfData, title, fileName, days = value
         # print('plotConuntryCasesByTime=', i, columnLabel, dfData.shape, title, fileName, days)
-        plotConuntryCasesByTime(path, dfData, columnLabel, title, fileName, days)
+        plotConuntryCasesByTime(path, dfData, columnLabel, title, fileName, days, show)
 
 
-def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60):
+def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60, show=True):
     plt.clf()
     ax = plt.subplot(1, 1, 1)
     print('title=', title)
@@ -260,7 +260,8 @@ def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60):
     plt.ylim(0)
     plt.tight_layout()
     plt.savefig(fileName)
-    plt.show()
+    if show:
+        plt.show()
 
 
 def plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=120):
@@ -311,7 +312,7 @@ def plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=120):
     plt.show()
 
 
-def plotConuntryCasesByTime(path, dfCountries, coloumnLabel, title, fileName, days=60):
+def plotConuntryCasesByTime(path, dfCountries, coloumnLabel, title, fileName, days=60, show=True):
     # dateIndex = getDateIndex()
     # print('dfCountries=\n', dfCountries)
     # countries = list(dfCountries.location.unique())
@@ -328,7 +329,7 @@ def plotConuntryCasesByTime(path, dfCountries, coloumnLabel, title, fileName, da
         # print('name=',name,'df=', df)
         dfAll.append((country, df))
 
-    plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=days)
+    plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=days, show=show)
     # plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=days)
 
 
@@ -341,7 +342,7 @@ def getTopData(df, top, columnLabel, binary=True, ascend=False):
     return dfData
 
 
-def plotCountriesTopCases(df):
+def plotCountriesTopCases(df, show=True):
     # df.set_index(["location"], inplace=True)
 
     dfWorld = df.loc['World']
@@ -402,10 +403,11 @@ def plotCountriesTopCases(df):
         fileName = os.path.join(gSaveBasePath, str(i + 1) + '.png')
         plotData(dfData, title=title, kind=kind, y=[columnLabel], fName=fileName,
                  save=True, show=False, color=color, figsize=(8, 5), left=0.3, bottom=0.1)
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plotContinentCountriesCases(df):
+def plotContinentCountriesCases(df, show=True):
     # df.set_index(["location"], inplace=True)
 
     dfWorld = df.loc['World']
@@ -450,6 +452,8 @@ def plotContinentCountriesCases(df):
 
     fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewCases.png')
     plt.savefig(fileName)
+    if show:
+        plt.show()
 
     plotAll = []
     columnLabel = 'new_deaths'
@@ -477,10 +481,11 @@ def plotContinentCountriesCases(df):
 
     fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewDeaths.png')
     plt.savefig(fileName)
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plotWorldCases(df):
+def plotWorldCases(df, show=True):
     df = df[df['location'] == 'World']
     df = df.drop(columns=['location', 'continent', 'iso_code'])
     df = df.dropna(subset=['total_cases'])
@@ -534,10 +539,11 @@ def plotWorldCases(df):
     y = ['new_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_RecentNewDeaths.png')
     plotData(dfWorldNew, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
-    plt.show()
+    if show:
+        plt.show()
 
 
-def plotContinentCases(df):
+def plotContinentCases(df, show=True):
     def plotContienet(dfContinent, y, title, fileName, color, fontsize=9):
         if 0:
             plotData(dfContinent, title=title, kind='bar', y=y, fName=fileName, color=color, bottom=0.17, top=0.9)
@@ -552,14 +558,14 @@ def plotContinentCases(df):
             # plt.bar(y1.index, y1, width=0.4) #bottom=0, color=color
             # plt.bar(y2.index, y2, width=0.4) #bottom=0, color=color
             fig = dfContinent.plot(kind='barh', title=title, y=y, color=color,
-                                  figsize=(8, 5), ylabel='', xlabel='', fontsize=fontsize)  # grid=True, logy=True
+                                   figsize=(8, 5), ylabel='', xlabel='', fontsize=fontsize)  # grid=True, logy=True
             # fig.get_xaxis().set_visible(False)
             fig.get_xaxis().tick_top()
             fig.axes.title.set_size(fontsize + 1)
             the_table = plt.table(cellText=dfContinentTable.values,
-                      rowLabels=dfContinentTable.index,
-                      colLabels=dfContinentTable.columns,
-                      loc='bottom')
+                                  rowLabels=dfContinentTable.index,
+                                  colLabels=dfContinentTable.columns,
+                                  loc='bottom')
             the_table.auto_set_font_size(False)
             the_table.set_fontsize(fontsize)
             # the_table.scale(2, 2)
@@ -570,7 +576,8 @@ def plotContinentCases(df):
             plt.subplots_adjust(left=0.15, bottom=0.25, right=None, top=0.82, wspace=None, hspace=None)
             plt.tight_layout()
             plt.savefig(fileName)
-            plt.show()
+            if show:
+                plt.show()
             # print('dfContinentTable=\n', dfContinentTable)
 
     dfContinent = df[df['continent'].isnull()]

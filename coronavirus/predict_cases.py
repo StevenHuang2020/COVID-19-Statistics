@@ -7,7 +7,7 @@ import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.utils import shuffle
+# from sklearn.utils import shuffle
 
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # from sklearn.model_selection import train_test_split, cross_val_score
@@ -29,33 +29,8 @@ gSaveChangeData = r'.\data\dataChange'
 gSaveCountryData = r'.\data\dataCountry'
 gSavePredict = r'.\data\dataPredict'
 
-
 gScaler = MinMaxScaler()  # StandardScaler()
-
-
-def binaryDf(df, labelAdd=True):
-    newdf = pd.DataFrame()
-    # print('pd.shape=',df.shape)
-    newIndex = []
-    for i in range(df.shape[0] // 2):
-        dd = df.iloc[i * 2, :]
-        if labelAdd:
-            newIndex.append(str(df.index[i * 2]) + ',' + str(df.index[i * 2 + 1]))  # combine
-        else:
-            newIndex.append(df.index[i * 2])  # drop
-
-        newdf = pd.concat([newdf, dd], ignore_index=True)
-
-    # print('newIndex=',len(newIndex))
-    # print('newdf.shape=',newdf.shape)
-    newdf.columns = df.columns
-    newdf.index = newIndex
-    return newdf
-
-
-def plotDataSet(data):
-    plt.plot(data)
-    plt.show()
+gPredictDays = 15
 
 
 def preprocessDb(dataset):
@@ -77,7 +52,7 @@ def create_dataset(dataset, look_back=1):
 
 def get_dataset(file):
     if not os.path.exists(file):
-        print('Data file is not exist, please run main_v1.3.py to get it first.')
+        print('warning, data file is not exist.')
         return None
 
     dataset = pd.read_csv(file)
@@ -161,9 +136,8 @@ def changeNewIndexFmt(newIndex, src_fmt='%d/%m/%Y', dst_fmt='%Y-%m-%d'):
     return new
 
 
-def plotPredictFuture(model, trainY, index, data):
-    Number = 10  # predict future Number days
-    pred = predictFuture(model, trainY[-1], Number)
+def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
+    pred = predictFuture(model, trainY[-1], days)
     print('predict start date:', index[-1])
 
     startIndex = index[-1]
@@ -176,7 +150,7 @@ def plotPredictFuture(model, trainY, index, data):
     # dst_fmt = '%d/%m/%Y'
     startIndex = datetime.datetime.strftime(sD, fmt)
     newIndex.append(startIndex)
-    for i in range(Number):
+    for i in range(days):
         d = sD + datetime.timedelta(days=i + 1)
         d = datetime.datetime.strftime(d, fmt)
         # print(d)
@@ -199,7 +173,7 @@ def plotPredictFuture(model, trainY, index, data):
 
     offset = 150  # 70 120
     # plt.figure(figsize=(8, 6))
-    plt.title('Future ' + str(Number) + ' days Covid-19,' + ' Predicted time: ' + get_datetime())
+    plt.title('Future ' + str(days) + ' days Covid-19,' + ' Predicted time: ' + get_datetime())
 
     ax = plt.gca()
     # ax = plt.subplot(1, 1, 1)
@@ -210,7 +184,7 @@ def plotPredictFuture(model, trainY, index, data):
     # print('oldIndex=', index[offset:])
     # print('newIndex=', newIndex)
 
-    tb = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='left')
+    tb = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(df.columns)))
@@ -334,10 +308,12 @@ def evaulate_predition(df, file):
         return 0
 
     dfPredict = getPredictDf(file)
+    dfPredict.drop(['Predicted daily newCases'], axis=1, inplace=True)
+
     predictTime = file[file.rfind('\\') + 1: file.rfind('_')]
 
-    # print('dfPredict=\n', dfPredict)
-    # print('predictTime=', predictTime)
+    print('dfPredict=\n', dfPredict)
+    print('predictTime=', predictTime)
     allCases = np.zeros((dfPredict.shape[0],))
     accs = []
     for i in range(dfPredict.shape[0]):
@@ -373,7 +349,7 @@ def evaulate_predition(df, file):
     # plt.figure(figsize=(8,6))
     title = 'Prediction Precision\n' + 'PredictTime: ' + predictTime + ' CheckTime: ' + get_datetime()
     plt.title(title, fontsize=9)
-    tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='left')
+    tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='center')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(dfPredict.columns)))
@@ -388,11 +364,13 @@ def evaulate_predition(df, file):
 def getNewestFile(path, fmt='csv', index=-1):
     file_dict = {}
     for i in traverse_files(path, fmt):
-        ctime = os.stat(os.path.join(i)).st_ctime
+        ctime = os.stat(os.path.join(i)).st_mtime  # st_ctime
+        ctime = datetime.datetime.fromtimestamp(ctime).strftime('%Y-%m-%d-%H:%M')
         file_dict[ctime] = i
 
     sort = sorted(file_dict.keys())
-    # print('sort=',sort)
+    # print('file_dict=', file_dict)
+    # print('sort=', sort)
     # get a previrous predicted file
     if abs(index) >= len(sort):
         index = 0
@@ -401,9 +379,12 @@ def getNewestFile(path, fmt='csv', index=-1):
 
 
 def predict(data):
+    if data is None:
+        return
+
     train(data)
 
-    file = getNewestFile(gSavePredict, index=-3)
+    file = getNewestFile(gSavePredict, index=-1 * gPredictDays)
     print('Last predicted file:', file)
     evaulate_predition(data, file)
 
@@ -414,8 +395,7 @@ def main():
 
     file = os.path.join(gDatasetPath, 'owid-covid-data.csv')
     data = get_dataset(file)
-    if data is not None:
-        predict(data)
+    predict(data)
 
 
 if __name__ == '__main__':

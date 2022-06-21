@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 from matplotlib import cm
 import matplotlib.pyplot as plt
-from predict_cases import plotDataAx, binaryDf
+from predict_cases import plotDataAx
 from predict_cases import gSaveBasePath, gSaveChangeData, gDatasetPath
 from predict_cases import gSaveCountryData, gSavePredict
 from json_update import get_datetime
@@ -46,6 +46,26 @@ def init_folder():
 
 def get_datetime_str():
     return str(' Date:') + get_datetime()
+
+
+def binaryDf(df, labelAdd=True):
+    newdf = pd.DataFrame()
+    # print('pd.shape=',df.shape)
+    newIndex = []
+    for i in range(df.shape[0] // 2):
+        dd = df.iloc[i * 2, :]
+        if labelAdd:
+            newIndex.append(str(df.index[i * 2]) + ',' + str(df.index[i * 2 + 1]))  # combine
+        else:
+            newIndex.append(df.index[i * 2])  # drop
+
+        newdf = pd.concat([newdf, dd], ignore_index=True)
+
+    # print('newIndex=',len(newIndex))
+    # print('newdf.shape=',newdf.shape)
+    newdf.columns = df.columns
+    newdf.index = newIndex
+    return newdf
 
 
 def plotCountriesFromOurWorld(csvpath=gDatasetPath, show=True):  # From ourworld data

@@ -87,7 +87,7 @@ def predictFuture(model, start, Number=5):
     # print('---------------future---------')
     # print('start=', start)
     # print(start.shape,'startval:', gScaler.inverse_transform(start.reshape(1, -1)))
-    start = np.array([start]).reshape(1, 1, 1)
+    start = np.array([start]).reshape(1, 1, 1) #lookback
     result = []
     result.append(start.flatten()[0])
     for _ in range(Number):
@@ -196,11 +196,11 @@ def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
     plt.show()
 
 
-def createModel(look_back=1):
+def create_model(look_back=1):
     model = Sequential()
-    model.add(LSTM(100, input_shape=(1, look_back)))
-    # model.add(LSTM(100, activation='relu'))
-    # model.add(LSTM(50, activation='relu'))
+    model.add(tf.keras.Input(shape=(1, look_back)))
+    model.add(LSTM(100, return_sequences=True))
+    model.add(LSTM(50, activation='relu'))
     model.add(Dense(30, activation='relu'))
     model.add(Dense(20, activation='relu'))
     model.add(Dense(10, activation='relu'))
@@ -243,6 +243,9 @@ def prepareDataset(dataset, look_back):
     # print('X =', X[:5])
     # print('Y =', Y[:5])
 
+    # X = np.reshape(X, (X.shape[0], 1, X.shape[1]))
+    # Y = np.reshape(X, (Y.shape[0], 1, 1))
+
     print('X.shape =', X.shape)
     print('Y.shape =', Y.shape)
     # x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=12)
@@ -251,13 +254,13 @@ def prepareDataset(dataset, look_back):
 
 def train(dataset, first=False, look_back=1):
     x_train, y_train, index, rawdata = prepareDataset(dataset, look_back)
-    # print('x_train.shape =', x_train.shape)
+    print('x_train.shape =', x_train.shape)
     # print('y_train.shape =', y_train.shape)
 
     pre_train_path = r'pre_trained'
     if first or not os.path.exists(pre_train_path):
         print('\nTraining model first time...\n')
-        model = createModel(look_back)
+        model = create_model(look_back)
     else:
         print('\nTraining model from pre-trained weights...\n')
         model = tf.keras.models.load_model(pre_train_path)
@@ -274,8 +277,8 @@ def train(dataset, first=False, look_back=1):
 
     model.save(pre_train_path)
     # a = np.array([trainY[-1]]).reshape(-1,1,1)
-    # #a = np.array([[0.88964097]]).reshape(-1,1,1)
-    # #a = np.array([0.6]).reshape(1,1,1)
+    # a = np.array([[0.88964097]]).reshape(-1,1,1)
+    # a = np.array([0.6]).reshape(1,1,1)
     # print('predict=', model.predict(a))
 
     # -----------------start plot--------------- #

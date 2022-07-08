@@ -87,7 +87,8 @@ def predictFuture(model, start, Number=5):
     # print('---------------future---------')
     # print('start=', start)
     # print(start.shape,'startval:', gScaler.inverse_transform(start.reshape(1, -1)))
-    start = np.array([start]).reshape(1, 1, 1) #lookback
+    # start = np.array([start]).reshape(1, 1, 1) #lookback  tf 2.8
+    start = np.array([start]).reshape(1, 1) #lookback  tf 2.9
     result = []
     result.append(start.flatten()[0])
     for _ in range(Number):
@@ -350,7 +351,7 @@ def evaulate_predition(df, file):
         # print('dfPredict=\n', dfPredict)
 
     # plt.figure(figsize=(8,6))
-    title = 'Prediction Precision\n' + 'PredictTime: ' + predictTime + ' CheckTime: ' + get_datetime()
+    title = 'Prediction Precision\n' + 'PredictedTime: ' + predictTime + ' CheckTime: ' + get_datetime()
     plt.title(title, fontsize=9)
     tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='center')
     tb.auto_set_font_size(False)

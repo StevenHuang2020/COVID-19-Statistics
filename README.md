@@ -8,10 +8,6 @@
 ![Tensorflow Version](https://img.shields.io/badge/Tensorflow-V2.9-brightgreen)
 ![Last update](https://img.shields.io/endpoint?color=brightgreen&style=flat-square&url=https%3A%2F%2Fraw.githubusercontent.com%2FStevenHuang2020%2FWebSpider%2Fmaster%2Fcoronavirus%2Fupdate.json)
 
-<!--footnotes define-->
-[^1]: https://ourworldindata.org/covid-cases
-[^2]: https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics
-
 <!--content start-->
 ### 📝 Contents
 - [Usage](#Usage)
@@ -79,7 +75,7 @@ Data Source[^1], dataset [here.](https://github.com/owid/covid-19-data/blob/mast
 
 
 ### NZ Covid-19 Statistic
-Data source reference [here.](https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics)
+Data source[^2] reference [here.](https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics)
 
 |||
 |---|---|
@@ -87,8 +83,8 @@ Data source reference [here.](https://www.health.govt.nz/our-work/diseases-and-c
 |<img src="images/NZ_COVID-19_RecentCases.png" width="320" height="240" />|<img src="images/NZ_COVID-19_EveryDayCases.png" width="320" height="240" />|
 
 
-
 ## References
 
- - Our World in Data[^1], datasheet dowload [here.](https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv) <br/>
- - NZ Ministry of Health[^2], datasheet refer to [here.](https://www.health.govt.nz/our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics )
+<!--footnotes define-->
+[^1]: https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv
+[^2]: https://raw.githubusercontent.com/minhealthnz/nz-covid-data/main/cases/covid-cases.csv

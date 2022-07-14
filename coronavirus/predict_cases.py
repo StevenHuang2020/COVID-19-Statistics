@@ -267,16 +267,17 @@ def train(dataset, first=False, look_back=1):
         model = tf.keras.models.load_model(pre_train_path)
 
         lr = optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=1e-6,
-            decay_steps=100,
+            initial_learning_rate=1e-5,
+            decay_steps=200,
             decay_rate=0.9)
 
         model.optimizer.learning_rate = lr  # 1e-5
 
     model.summary()
-    model.fit(x_train, y_train, epochs=150, batch_size=16, verbose=1)  # verbose=2
+    model.fit(x_train, y_train, epochs=200, batch_size=16, verbose=1)  # verbose=2
 
     model.save(pre_train_path)
+
     # a = np.array([trainY[-1]]).reshape(-1,1,1)
     # a = np.array([[0.88964097]]).reshape(-1,1,1)
     # a = np.array([0.6]).reshape(1,1,1)
@@ -329,8 +330,8 @@ def evaulate_predition(df, file):
         acc = 0
         cases = getTrueCases(date, df)
         if cases != 0:
-            acc = round((1 - (np.abs(cases - predictCase) / cases)) * 100, 3)
-            acc = format(acc, '.3f')
+            acc = round((1 - (np.abs(cases - predictCase) / cases)), 5)
+            acc = format(acc, '.5f')
 
         # print(date,predictCase)
         # print(date,predictCase,cases)
@@ -350,7 +351,7 @@ def evaulate_predition(df, file):
         dfPredict.loc[:, 'Date'] = newDates
         # print('dfPredict=\n', dfPredict)
 
-    # plt.figure(figsize=(8,6))
+    # plt.figure(figsize=(8, 6))
     title = 'Prediction Precision\n' + 'PredictedTime: ' + predictTime + ' CheckTime: ' + get_datetime()
     plt.title(title, fontsize=9)
     tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='center')
@@ -359,6 +360,11 @@ def evaulate_predition(df, file):
     # colList = list(range(len(dfPredict.columns)))
     colList = [1, 2]
     tb.auto_set_column_width(col=colList)
+
+    # set precision colomn font color
+    # print('dfPredict.values.shape=', dfPredict.values.shape)
+    for i in range(1, dfPredict.values.shape[0] + 1):
+        tb[(i, 3)].get_text().set_color('red')
 
     plt.axis('off')
     plt.savefig(os.path.join(gSaveBasePath, 'WorldFuturePredictPrecise.png'))

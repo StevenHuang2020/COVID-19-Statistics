@@ -267,7 +267,7 @@ def train(dataset, first=False, look_back=1):
         model = tf.keras.models.load_model(pre_train_path)
 
         lr = optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=1e-5,
+            initial_learning_rate=1e-6,
             decay_steps=200,
             decay_rate=0.9)
 
@@ -394,7 +394,7 @@ def predict(data):
 
     train(data)
 
-    file = getNewestFile(gSavePredict, index=-1 * gPredictDays)
+    file = getNewestFile(gSavePredict, index=-1 * gPredictDays + 5)
     print('Last predicted file:', file)
     evaulate_predition(data, file)
 

@@ -268,7 +268,7 @@ def train(dataset, first=False, look_back=1):
 
         lr = optimizers.schedules.ExponentialDecay(
             initial_learning_rate=1e-6,
-            decay_steps=200,
+            decay_steps=100,
             decay_rate=0.9)
 
         model.optimizer.learning_rate = lr  # 1e-5

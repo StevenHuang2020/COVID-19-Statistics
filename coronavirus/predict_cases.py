@@ -267,7 +267,7 @@ def train(dataset, first=False, look_back=1):
         model = tf.keras.models.load_model(pre_train_path)
 
         lr = optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=1e-6,
+            initial_learning_rate=1e-5,
             decay_steps=100,
             decay_rate=0.9)
 

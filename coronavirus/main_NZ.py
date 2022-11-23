@@ -162,6 +162,8 @@ def plotTotal(df, title, label, showNumberOnBar=False):
 
 
 def plotNZDataChange(df):
+    print("\nPlot NZ data by time started...")
+
     def getDataRecordNum(df, date):
         return df[df['Report Date'] == date].shape[0]
 
@@ -180,12 +182,14 @@ def plotNZDataChange(df):
     # print(dfDate.shape)
 
     dfDate = sorted(set(dfDate))
-    # print('dfDate=', len(dfDate),dfDate)
+    # print('dfDate=', len(dfDate))
+    dropDays = int(len(dfDate) * 2 / 3)  # drop days very long before
+    dfDate = dfDate[dropDays:]
 
     startDate = dfDate[0]
     stopDate = dfDate[-1]
     days = totalDays(startDate, stopDate)
-    # print('startDate,stopDate=',startDate,stopDate,days)
+    print('startDate, stopDate=', startDate, stopDate, days)
 
     columns = ['Date', 'Number', 'Cumlative']
     dfStat = pd.DataFrame()
@@ -208,9 +212,10 @@ def plotNZDataChange(df):
     recentDays = 40
     dfStatRecent = dfStat[-1 * recentDays:]
 
-    dfStat = dfStat.iloc[::6]  # drop some lines
+    # dfStat = dfStat.iloc[::6]  # drop some lines
     # dfWorld = binaryDf(dfWorld,False) #drop half
-    print('head after drop:\n', dfStat.head())
+    print('Header after drop:\n', dfStat.head())
+    print('Shape:', dfStat.shape)
 
     label = 'NZ_COVID-19_EveryDayCases'
     plotTotal(dfStat['Number'], label=label, title=label + ' ' + today)

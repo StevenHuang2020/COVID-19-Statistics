@@ -201,19 +201,20 @@ def create_model(look_back=1):
     model = Sequential()
     model.add(tf.keras.Input(shape=(1, look_back)))
     model.add(LSTM(100, return_sequences=True))
-    model.add(LSTM(50, activation='relu'))
+    model.add(LSTM(50, return_sequences=True))
+    # model.add(LSTM(30, return_sequences=True))
+    # model.add(LSTM(20, return_sequences=True))
+    model.add(LSTM(30, activation='relu'))
     model.add(Dense(30, activation='relu'))
     model.add(Dense(20, activation='relu'))
     model.add(Dense(10, activation='relu'))
     model.add(Dense(1))
 
     # fixed learning rate
-    # lr = 1e-3
+    lr = 1e-4
 
     # learning rate schedule
-    lr = optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-4,
-                                               decay_steps=10000,
-                                               decay_rate=0.99)
+    # lr = optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-4, decay_steps=100,  decay_rate=0.99)
 
     # opt = optimizers.SGD(learning_rate=lr)
     # opt = optimizers.SGD(learning_rate=lr, momentum=0.8, nesterov=False)
@@ -253,9 +254,8 @@ def prepareDataset(dataset, look_back):
     return X, Y, index, rawdata
 
 
-def train(dataset, first=False, look_back=1):
-    x_train, y_train, index, rawdata = prepareDataset(dataset, look_back)
-    print('x_train.shape =', x_train.shape)
+def train(x_train, y_train, first=False, look_back=1):
+    # print('x_train.shape =', x_train.shape)
     # print('y_train.shape =', y_train.shape)
 
     pre_train_path = r'pre_trained'
@@ -271,10 +271,10 @@ def train(dataset, first=False, look_back=1):
             decay_steps=100,
             decay_rate=0.9)
 
-        model.optimizer.learning_rate = lr  # 1e-5
+        model.optimizer.learning_rate = lr
 
     model.summary()
-    model.fit(x_train, y_train, epochs=200, batch_size=16, verbose=1)  # verbose=2
+    model.fit(x_train, y_train, epochs=300, batch_size=64, verbose=1)  # verbose=2
 
     model.save(pre_train_path)
 
@@ -282,10 +282,7 @@ def train(dataset, first=False, look_back=1):
     # a = np.array([[0.88964097]]).reshape(-1,1,1)
     # a = np.array([0.6]).reshape(1,1,1)
     # print('predict=', model.predict(a))
-
-    # -----------------start plot--------------- #
-    plotPredictCompare(model, x_train, index, rawdata)
-    plotPredictFuture(model, y_train, index, rawdata)
+    return model
 
 
 def getPredictDf(file):
@@ -318,7 +315,7 @@ def evaulate_predition(df, file):
     predictTime = file[file.rfind('\\') + 1: file.rfind('_')]
 
     print('dfPredict=\n', dfPredict)
-    print('predictTime=', predictTime)
+    print('predict time=', predictTime)
     allCases = np.zeros((dfPredict.shape[0],))
     accs = []
     for i in range(dfPredict.shape[0]):
@@ -392,8 +389,15 @@ def predict(data):
     if data is None:
         return
 
-    train(data)
+    look_back = 1
+    x_train, y_train, index, rawdata = prepareDataset(data, look_back)
+    model = train(x_train, y_train, first=False, look_back=look_back)
+    
+    # -----------------start plot prediction---------------
+    plotPredictCompare(model, x_train, index, rawdata)
+    plotPredictFuture(model, y_train, index, rawdata)
 
+    # -----------------evaluate the previous prediction----
     file = getNewestFile(gSavePredict, index=-1 * gPredictDays + 5)
     print('Last predicted file:', file)
     evaulate_predition(data, file)

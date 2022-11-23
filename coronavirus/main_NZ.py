@@ -52,7 +52,8 @@ def plotStatistcs(df, title, label):
     for p in ax.patches:
         b = p.get_bbox()
         val = "{}".format(int(b.y1 + b.y0))
-        ax.annotate(val, ((b.x0 + b.x1) / 2 + x_offset, b.y1 + y_offset), fontsize=fontsize)
+        ax.annotate(val, ((b.x0 + b.x1) / 2 + x_offset,
+                    b.y1 + y_offset), fontsize=fontsize)
 
     ax.set_title(title, fontsize=fontsize + 1)
     # ax.legend(fontsize=fontsize)
@@ -60,7 +61,8 @@ def plotStatistcs(df, title, label):
     plt.setp(ax.get_yticklabels(), rotation=30, fontsize=fontsize)
     plt.xlabel('')
     plt.ylabel('')
-    plt.subplots_adjust(left=0.2, bottom=0.22, right=0.98, top=0.94, wspace=None, hspace=None)
+    plt.subplots_adjust(left=0.2, bottom=0.22, right=0.98,
+                        top=0.94, wspace=None, hspace=None)
     plt.savefig(os.path.join(gSaveBasePath, 'NZ_' + label + '.png'))
     # plt.show()
 
@@ -68,48 +70,47 @@ def plotStatistcs(df, title, label):
 def parseConfirmed(df):
     print('Confirmed dataset:\n', df.head())
     Sex = list(set(df['Sex']))
+    print('Sex:\n', Sex)
     AgeGroup = list(set(df['Age group'].astype(str)))
     print('AgeGroup:\n', AgeGroup)
     AgeGroup.sort()
+    print('AgeGroup sorted:\n', AgeGroup)
     # AgeGroup = [ '<1', '1 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 29', '30 to 39', '40 to 49', '50 to 59', '60 to 69', '70+']
 
     DHB = list(set(df['DHB']))
+    print('DHB:\n', DHB)
     bOverseas = list(set(df['Overseas travel']))
-
-    if ' ' in bOverseas:
-        bOverseas.remove(' ')
-
-    print('Sex=', Sex)
-    print('AgeGroup=', AgeGroup)
-    print('DHB=', DHB)
-    print('bOverseas=', bOverseas)
-    # print('LastTravelCountry=', LastTravelCountry)
+    print('bOverseas:\n', bOverseas)
 
     columns = ['Gender', 'Number']
     dfSex = pd.DataFrame()
     for i in Sex:
-        line = pd.DataFrame([[i, df[df['Sex'] == i].shape[0]]], columns=columns)
+        line = pd.DataFrame(
+            [[i, df[df['Sex'] == i].shape[0]]], columns=columns)
         dfSex = pd.concat([dfSex, line], ignore_index=True)
     dfSex.set_index(["Gender"], inplace=True)
 
     columns = ['Group', 'Number']
     dfAgeGroup = pd.DataFrame()
     for i in AgeGroup:
-        line = pd.DataFrame([[i, df[df['Age group'] == i].shape[0]]], columns=columns)
+        line = pd.DataFrame(
+            [[i, df[df['Age group'] == i].shape[0]]], columns=columns)
         dfAgeGroup = pd.concat([dfAgeGroup, line], ignore_index=True)
     dfAgeGroup.set_index(["Group"], inplace=True)
 
     columns = ['DHB', 'Number']
     dfDHB = pd.DataFrame()
     for i in DHB:
-        line = pd.DataFrame([[i, df[df['DHB'] == i].shape[0]]], columns=columns)
+        line = pd.DataFrame(
+            [[i, df[df['DHB'] == i].shape[0]]], columns=columns)
         dfDHB = pd.concat([dfDHB, line], ignore_index=True)
     dfDHB.set_index(["DHB"], inplace=True)
 
     columns = ['Overseas', 'Number']
     dfbOverseas = pd.DataFrame()
     for i in bOverseas:
-        line = pd.DataFrame([[i, df[df['Overseas travel'] == i].shape[0]]], columns=columns)
+        line = pd.DataFrame(
+            [[i, df[df['Overseas travel'] == i].shape[0]]], columns=columns)
         dfbOverseas = pd.concat([dfbOverseas, line], ignore_index=True)
     dfbOverseas.set_index(["Overseas"], inplace=True)
 
@@ -118,12 +119,6 @@ def parseConfirmed(df):
     dfDHB = dfDHB.sort_values(by=['Number'], ascending=False)
     # dfbOverseas = dfbOverseas.sort_values(by=['Case_Per_1M_people'], ascending=False)
     # dfLastTravelCountry = dfLastTravelCountry.sort_values(by=['Number'], ascending=False)
-
-    # print(dfSex)
-    # print(dfAgeGroup)
-    # print(dfDHB)
-    # print(dfbOverseas)
-    # print(dfLastTravelCountry)
 
     now = datetime.datetime.now()
     today = str(' Date:') + str(now.strftime("%Y-%m-%d %H:%M:%S"))
@@ -151,7 +146,8 @@ def plotTotal(df, title, label, showNumberOnBar=False):
         for p in ax.patches:
             b = p.get_bbox()
             val = "{}".format(int(b.y1 + b.y0))
-            ax.annotate(val, ((b.x0 + b.x1) / 2 + x_offset, b.y1 + y_offset), fontsize=fontsize)
+            ax.annotate(val, ((b.x0 + b.x1) / 2 + x_offset,
+                        b.y1 + y_offset), fontsize=fontsize)
 
     ax.set_title(title, fontsize=fontsize)
     # ax.legend(fontsize=fontsize)
@@ -159,7 +155,8 @@ def plotTotal(df, title, label, showNumberOnBar=False):
     plt.setp(ax.get_yticklabels(), rotation=30, fontsize=fontsize)
     plt.xlabel('')
     plt.ylabel('')
-    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+    plt.subplots_adjust(left=None, bottom=None, right=None,
+                        top=None, wspace=None, hspace=None)
     plt.savefig(os.path.join(gSaveBasePath, label + '.png'))
     # plt.show()
 
@@ -224,7 +221,8 @@ def plotNZDataChange(df):
 
     label = 'NZ_COVID-19_RecentCases'
     title = label + ' ' + str(recentDays) + ' days, ' + today
-    plotTotal(dfStatRecent['Number'], label=label, title=title, showNumberOnBar=True)
+    plotTotal(dfStatRecent['Number'], label=label,
+              title=title, showNumberOnBar=True)
     plt.show()
 
 
@@ -244,9 +242,11 @@ def download_file(url):
 
 
 def getNZCovid19():
-    # return read_csv(r'.data\NZ\covid_cases_2022-01-26.csv')
+    # file = r'data\NZ\covid-cases.csv'
     file = download_file(CASE_CSV)
-    return read_csv(file)
+    dtypes = {'Report Date': 'str', 'Case Status': 'str', 'Sex': 'str',
+              'Age group': 'str', 'DHB': 'str', 'Overseas travel': 'str'}
+    return pd.read_csv(file, dtype=dtypes)
 
 
 def plotStatistic(df):

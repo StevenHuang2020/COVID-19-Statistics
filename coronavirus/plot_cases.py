@@ -55,7 +55,8 @@ def binaryDf(df, labelAdd=True):
     for i in range(df.shape[0] // 2):
         dd = df.iloc[i * 2, :]
         if labelAdd:
-            newIndex.append(str(df.index[i * 2]) + ',' + str(df.index[i * 2 + 1]))  # combine
+            newIndex.append(
+                str(df.index[i * 2]) + ',' + str(df.index[i * 2 + 1]))  # combine
         else:
             newIndex.append(df.index[i * 2])  # drop
 
@@ -100,11 +101,13 @@ def plotData(df, title='', kind='line', y=None, fName='', logy=False,
     plt.setp(fig.get_xticklabels(), rotation=30, ha="right")
     # plt.setp(fig.get_yticklabels())
     # plt.tight_layout()
-    plt.subplots_adjust(left=left, bottom=bottom, right=0.96, top=top, wspace=None, hspace=None)
+    plt.subplots_adjust(left=left, bottom=bottom, right=0.96,
+                        top=top, wspace=None, hspace=None)
     if save:
         plt.savefig(fName)
     if show:
         plt.show()
+    plt.close()
 
 
 def read_csv(file):
@@ -135,7 +138,8 @@ def getAllOurWorldNew(csvpath=gSaveCountryData):
             if df.shape[0] > 1:
                 newestLine = df.iloc[[-1]]
                 # print("newestLine=\n", newestLine);
-                if np.isnan(newestLine['total_cases'][0]):  # filter the last line not equal to 0
+                # filter the last line not equal to 0
+                if np.isnan(newestLine['total_cases'][0]):
                     if df.shape[0] > 2:
                         newestLine = df.iloc[[-2]]
                         return newestLine
@@ -144,7 +148,8 @@ def getAllOurWorldNew(csvpath=gSaveCountryData):
         return None
 
     dfAll = []
-    continents = ['Asia', 'Europe', 'Africa', 'North America', 'South America', 'Oceania', 'World']
+    continents = ['Asia', 'Europe', 'Africa',
+                  'North America', 'South America', 'Oceania', 'World']
     for fileCountry in traverse_files(csvpath, 'csv'):
         # fileCountry = os.path.join(vaccPath, 'vaccination_Burkina Faso.csv')
         line = getCountryNewestLine(fileCountry)
@@ -179,7 +184,8 @@ def plotCountryCases(dfToday, path, show=True):
         # dfData = df.filter(like = 'aus', axis=0)
         return dfData
 
-    df = dfToday[dfToday['continent'].notnull()]  # remain countries not continent
+    # remain countries not continent
+    df = dfToday[dfToday['continent'].notnull()]
     # print('df=', df)
 
     top = 15
@@ -253,7 +259,8 @@ def plotCountryCases(dfToday, path, show=True):
     for i, value in enumerate(plotAll):
         columnLabel, dfData, title, fileName, days = value
         # print('plotConuntryCasesByTime=', i, columnLabel, dfData.shape, title, fileName, days)
-        plotConuntryCasesByTime(path, dfData, columnLabel, title, fileName, days, show)
+        plotConuntryCasesByTime(path, dfData, columnLabel,
+                                title, fileName, days, show)
 
 
 def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60, show=True):
@@ -272,9 +279,11 @@ def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60, show=T
         # inter = 12
         # y = y[::inter]
 
-        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]  # recent days
+        # recent days
+        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]
         # plotCountryAx(ax,y.index, y, label=country)
-        plotDataAx(ax, y.index, y[coloumnLabel], label=country, fontsize=fontsize)
+        plotDataAx(ax, y.index, y[coloumnLabel],
+                   label=country, fontsize=fontsize)
         # break
 
     plt.ylim(0)
@@ -282,6 +291,7 @@ def plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=60, show=T
     plt.savefig(fileName)
     if show:
         plt.show()
+    plt.close()
 
 
 def plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=120):
@@ -307,7 +317,8 @@ def plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=120):
         # inter = 12
         # y = y[::inter]
 
-        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]  # recent 30 days
+        # recent 30 days
+        y = df.iloc[-1 * days:, [df.columns.get_loc(coloumnLabel)]]
 
         color = colors[i]
 
@@ -322,7 +333,8 @@ def plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=120):
 
     inter = (top - bottom) // 25
     for i in range(int(bottom), int(top), int(inter)):
-        plt.plot(y.index, [i] * len(y.index), "--", lw=0.5, color="black", alpha=0.3)
+        plt.plot(y.index, [i] * len(y.index), "--",
+                 lw=0.5, color="black", alpha=0.3)
 
     plt.legend(loc='upper left')
     # plt.yscale('log')
@@ -349,7 +361,8 @@ def plotConuntryCasesByTime(path, dfCountries, coloumnLabel, title, fileName, da
         # print('name=',name,'df=', df)
         dfAll.append((country, df))
 
-    plotCountryCasesStyle1(dfAll, coloumnLabel, title, fileName, days=days, show=show)
+    plotCountryCasesStyle1(dfAll, coloumnLabel, title,
+                           fileName, days=days, show=show)
     # plotCountryCasesStyle2(dfAll, coloumnLabel, title, fileName, days=days)
 
 
@@ -383,39 +396,47 @@ def plotCountriesTopCases(df, show=True):
     columnLabel = 'total_cases'
     dfData = getTopData(df, top, columnLabel)
 
-    title = 'World top ' + str(top) + ' Confirmed(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' Confirmed(World: ' + \
+        str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     color = '#1f77b4'
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'new_cases'
     dfData = getTopData(df, top, columnLabel)
-    title = 'World top ' + str(top) + ' NewCase(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' NewCase(World: ' + \
+        str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'total_cases_per_million'
     dfData = getTopData(df, top, columnLabel)
-    title = 'World top ' + str(top) + ' Cases per Million(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' Cases per Million(World: ' + \
+        str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'total_deaths'
     dfData = getTopData(df, top, columnLabel)
-    title = 'World top ' + str(top) + ' Deaths(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' Deaths(World: ' + \
+        str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     color = 'r'
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'new_deaths'
     dfData = getTopData(df, top, columnLabel)
-    title = 'World top ' + str(top) + ' New Deaths(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' New Deaths(World: ' + \
+        str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'mortality'
     dfData = getTopData(df, top, columnLabel)
-    title = 'World top ' + str(top) + ' Mortality(World: ' + str(dfWorld[columnLabel]) + ')' + get_datetime_str()
+    title = 'World top ' + str(top) + ' Mortality(World: ' + \
+        str(dfWorld[columnLabel]) + ')' + get_datetime_str()
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     columnLabel = 'mortality'
     dfData = getTopData(df, top, columnLabel, ascend=True)
-    title = 'World lowest ' + str(top) + ' Mortality(World: ' + str(dfWorld[columnLabel]) + ')' + get_datetime_str()
+    title = 'World lowest ' + \
+        str(top) + ' Mortality(World: ' + \
+        str(dfWorld[columnLabel]) + ')' + get_datetime_str()
     plotAll.append((columnLabel, dfData, kind, title, color))
 
     for i, value in enumerate(plotAll):
@@ -423,8 +444,8 @@ def plotCountriesTopCases(df, show=True):
         fileName = os.path.join(gSaveBasePath, str(i + 1) + '.png')
         plotData(dfData, title=title, kind=kind, y=[columnLabel], fName=fileName,
                  save=True, show=False, color=color, figsize=(8, 5), left=0.3, bottom=0.1)
-    if show:
-        plt.show()
+    # if show:
+    #     plt.show()
 
 
 def plotContinentCountriesCases(df, show=True):
@@ -457,7 +478,8 @@ def plotContinentCountriesCases(df, show=True):
     fontsize = 10
     nrow = 2
     ncol = 3
-    title = 'Continent today\'s new cases(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'Continent today\'s new cases(World: ' + str(
+        int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     fig, axes = plt.subplots(nrow, ncol, figsize=(9, 6))
     fig.suptitle(title, fontsize=fontsize + 1)  #
     for i, value in enumerate(plotAll):
@@ -467,13 +489,16 @@ def plotContinentCountriesCases(df, show=True):
                          color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='', fontsize=fontsize)
         ax.axes.title.set_size(fontsize)
         plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+        plt.subplots_adjust(left=None, bottom=None, right=None,
+                            top=None, wspace=None, hspace=None)
         plt.tight_layout()
 
-    fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewCases.png')
+    fileName = os.path.join(
+        gSaveBasePath, 'continentTopCountries_NewCases.png')
     plt.savefig(fileName)
     if show:
         plt.show()
+    plt.close()
 
     plotAll = []
     columnLabel = 'new_deaths'
@@ -486,7 +511,8 @@ def plotContinentCountriesCases(df, show=True):
         title = continent + ' top ' + str(top) + ' New Deaths'
         plotAll.append((columnLabel, dfData, kind, title, color))
 
-    title = 'Continent today\'s new deaths(World: ' + str(int(dfWorld[columnLabel])) + ')' + get_datetime_str()
+    title = 'Continent today\'s new deaths(World: ' + str(
+        int(dfWorld[columnLabel])) + ')' + get_datetime_str()
     fig, axes = plt.subplots(nrow, ncol, figsize=(9, 6))
     fig.suptitle(title, fontsize=fontsize + 1)
     for i, value in enumerate(plotAll):
@@ -496,13 +522,16 @@ def plotContinentCountriesCases(df, show=True):
                          color=color, grid=False, logy=False, legend=False, xlabel='', ylabel='', fontsize=fontsize)
         ax.axes.title.set_size(fontsize)
         plt.setp(ax.get_xticklabels(), rotation=30, ha="right")
-        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+        plt.subplots_adjust(left=None, bottom=None, right=None,
+                            top=None, wspace=None, hspace=None)
         plt.tight_layout()
 
-    fileName = os.path.join(gSaveBasePath, 'continentTopCountries_NewDeaths.png')
+    fileName = os.path.join(
+        gSaveBasePath, 'continentTopCountries_NewDeaths.png')
     plt.savefig(fileName)
     if show:
         plt.show()
+    plt.close()
 
 
 def plotWorldCases(df, show=True):
@@ -524,27 +553,32 @@ def plotWorldCases(df, show=True):
     title = 'World Cases,' + get_datetime_str()
     y = ['total_cases']
     fileName = os.path.join(gSaveBasePath, 'World_Cases.png')
-    plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
+    plotData(df, title=title, kind='bar', y=y,
+             fName=fileName, show=False, figsize=(8, 5))
 
     title = 'World New Cases,' + get_datetime_str()
     y = ['new_cases']
     fileName = os.path.join(gSaveBasePath, 'World_NewCases.png')
-    plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
+    plotData(df, title=title, kind='bar', y=y,
+             fName=fileName, show=False, figsize=(8, 5))
 
     title = 'World Deaths,' + get_datetime_str()
     y = ['total_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_Deaths.png')
-    plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
+    plotData(df, title=title, kind='bar', y=y, fName=fileName,
+             show=False, figsize=(8, 5), color='r')
 
     title = 'World New Deaths,' + get_datetime_str()
     y = ['new_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_NewDeaths.png')
-    plotData(df, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
+    plotData(df, title=title, kind='bar', y=y, fName=fileName,
+             show=False, figsize=(8, 5), color='r')
 
     title = 'World Mortality,' + get_datetime_str()
     y = ['mortality']
     fileName = os.path.join(gSaveBasePath, 'World_Mortality.png')
-    plotData(df, title=title, kind='line', y=y, fName=fileName, show=False, figsize=(8, 5), color='r', grid=True)
+    plotData(df, title=title, kind='line', y=y, fName=fileName,
+             show=False, figsize=(8, 5), color='r', grid=True)
 
     newRecentDays = 60
     dfWorldNew = df.iloc[-1 - newRecentDays:-1, :]
@@ -553,12 +587,15 @@ def plotWorldCases(df, show=True):
     title = 'World Recent {} New Cases,'.format(strRecent) + get_datetime_str()
     y = ['new_cases']
     fileName = os.path.join(gSaveBasePath, 'World_RecentNewCases.png')
-    plotData(dfWorldNew, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5))
+    plotData(dfWorldNew, title=title, kind='bar', y=y,
+             fName=fileName, show=False, figsize=(8, 5))
 
-    title = 'World Recent {} New Deaths,'.format(strRecent) + get_datetime_str()
+    title = 'World Recent {} New Deaths,'.format(
+        strRecent) + get_datetime_str()
     y = ['new_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_RecentNewDeaths.png')
-    plotData(dfWorldNew, title=title, kind='bar', y=y, fName=fileName, show=False, figsize=(8, 5), color='r')
+    plotData(dfWorldNew, title=title, kind='bar', y=y,
+             fName=fileName, show=False, figsize=(8, 5), color='r')
     if show:
         plt.show()
 
@@ -566,10 +603,12 @@ def plotWorldCases(df, show=True):
 def plotContinentCases(df, show=True):
     def plotContienet(dfContinent, y, title, fileName, color, fontsize=9):
         if 0:
-            plotData(dfContinent, title=title, kind='bar', y=y, fName=fileName, color=color, bottom=0.17, top=0.9)
+            plotData(dfContinent, title=title, kind='bar', y=y,
+                     fName=fileName, color=color, bottom=0.17, top=0.9)
         else:
             # dfContinentTable = dfContinent.iloc[:, [2,3,5,6]]
-            dfContinentTable = dfContinent.iloc[:, [dfContinent.columns.get_loc(i) for i in y]]
+            dfContinentTable = dfContinent.iloc[:, [
+                dfContinent.columns.get_loc(i) for i in y]]
             dfContinentTable = dfContinentTable.astype('int32')
 
             # start to plot bar and table
@@ -593,11 +632,13 @@ def plotContinentCases(df, show=True):
             plt.setp(fig.get_xticklabels(), rotation=30, ha="right")
             # plt.setp(fig.get_yticklabels()) #fontsize=fontsize
 
-            plt.subplots_adjust(left=0.15, bottom=0.25, right=None, top=0.82, wspace=None, hspace=None)
+            plt.subplots_adjust(left=0.15, bottom=0.25,
+                                right=None, top=0.82, wspace=None, hspace=None)
             plt.tight_layout()
             plt.savefig(fileName)
             if show:
                 plt.show()
+            plt.close()
             # print('dfContinentTable=\n', dfContinentTable)
 
     dfContinent = df[df['continent'].isnull()]
@@ -619,7 +660,8 @@ def plotContinentCases(df, show=True):
     # print('dfContinent=\n', dfContinent)
     # print('dfContinent.columns=\n', dfContinent.columns)
 
-    wroldstr = 'World total cases:{}, total deaths:{}'.format(worldTotalCases, worldTotalDeaths)
+    wroldstr = 'World total cases:{}, total deaths:{}'.format(
+        worldTotalCases, worldTotalDeaths)
     title = wroldstr + '\n' + get_datetime_str()
     y = ['total_cases', 'total_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_casesContinent.png')
@@ -627,7 +669,8 @@ def plotContinentCases(df, show=True):
     dfContinent = dfContinent.sort_values(by=[y[0]], ascending=False)
     plotContienet(dfContinent, y, title, fileName, color)
 
-    wroldstr = 'World new cases:{}, new deaths:{}'.format(worldNewCases, worldNewDeaths)
+    wroldstr = 'World new cases:{}, new deaths:{}'.format(
+        worldNewCases, worldNewDeaths)
     title = wroldstr + '\n' + get_datetime_str()
     y = ['new_cases', 'new_deaths']
     fileName = os.path.join(gSaveBasePath, 'World_newCasesContinent.png')
@@ -640,9 +683,11 @@ def getCountryNewCasesAndDeathsDf(pdDate):
     pdDate['NewDeaths'] = 0
     # print(pdDate.head(5))
     for i in range(pdDate.shape[0] - 1):
-        newConfirmed = pdDate['Confirmed'].iloc[i + 1] - pdDate['Confirmed'].iloc[i]
+        newConfirmed = pdDate['Confirmed'].iloc[i + 1] - \
+            pdDate['Confirmed'].iloc[i]
         newConfirmed = max(newConfirmed, 0)
-        pdDate.iloc[i + 1, pdDate.columns.get_loc("NewConfirmed")] = newConfirmed
+        pdDate.iloc[i + 1,
+                    pdDate.columns.get_loc("NewConfirmed")] = newConfirmed
 
         newDeaths = pdDate['Deaths'].iloc[i + 1] - pdDate['Deaths'].iloc[i]
         newDeaths = max(newDeaths, 0)
@@ -657,7 +702,8 @@ def getCountryNewCasesAndDeathsDf(pdDate):
 
 def saveCountriesInfo(all):
     countries = all[-1][1]['Location']
-    bar = SimpleProgressBar(total=len(countries), title='Save Country Files', width=30)
+    bar = SimpleProgressBar(total=len(countries),
+                            title='Save Country Files', width=30)
     for k, i in enumerate(countries):
         df = getCountryDayData(i, all)
         # print(df.head(5))
@@ -681,7 +727,8 @@ def saveAllCases2CSV(file, casesFile):
                 'new_deaths_smoothed_per_million']
 
     dfCases = df.loc[:, nColumns]
-    dfCases['mortality'] = round(dfCases['total_deaths'] / dfCases['total_cases'], 6)  # round 6
+    dfCases['mortality'] = round(
+        dfCases['total_deaths'] / dfCases['total_cases'], 6)  # round 6
 
     dfCases.set_index(["location"], inplace=True)
     print(dfCases.head())
@@ -697,7 +744,8 @@ def saveCountriesInfoFromCsv(csvPath):
     create_path(gSaveCountryData)
     countries = list(df.location.unique())
     # print('countries=', countries, len(countries))
-    bar = SimpleProgressBar(total=len(countries), title='Save Country Files', width=30)
+    bar = SimpleProgressBar(total=len(countries),
+                            title='Save Country Files', width=30)
     for i, country in enumerate(countries):
         name = country + '.csv'
         # print(name)
@@ -731,7 +779,9 @@ def plotCountryInfo(all, column='Confirmed'):
         # print(df.head(5))
         # df = binaryDf(df,labelAdd=False)
         df = df.iloc[-1 * days:, :]  # recent 30 days
-        title = column + ' Cases, Top ' + str(countriesNumbers) + ' countries, ' + 'Recent ' + str(days) + ' days'
+        title = column + ' Cases, Top ' + \
+            str(countriesNumbers) + ' countries, ' + \
+            'Recent ' + str(days) + ' days'
         plotCountryAx(ax, df['Date'], df[column], label=i, title=title)
 
     if column not in ('NewConfirmed', 'NewDeaths'):
@@ -765,8 +815,11 @@ def plotCountryInfo2(all, column='Confirmed'):
         df = df.iloc[-1 * days:, :]  # recent 30 days
         color = cm.jet(float(k) / countriesNumbers)
         # print('color=',color)
-        title = column + ' Cases, Top ' + str(countriesNumbers) + ' countries, ' + 'Recent ' + str(days) + ' days'
-        plotCountryAx(ax, df['Date'], df[column], label=i, title=title, color=color)
+        title = column + ' Cases, Top ' + \
+            str(countriesNumbers) + ' countries, ' + \
+            'Recent ' + str(days) + ' days'
+        plotCountryAx(ax, df['Date'], df[column],
+                      label=i, title=title, color=color)
 
         # ax.text(df['Date'][-1], df[column][-1], i)
         # print(df.head(5))
@@ -781,7 +834,8 @@ def plotCountryInfo2(all, column='Confirmed'):
     # if column=='Confirmed':
     #     inter = 1000000
     for y in range(int(bottom), int(top), int(inter)):
-        plt.plot(df['Date'], [y] * len(df['Date']), "--", lw=0.5, color="black", alpha=0.3)
+        plt.plot(df['Date'], [y] * len(df['Date']),
+                 "--", lw=0.5, color="black", alpha=0.3)
 
     # plt.xlim('2020-05-01', '2020-06-20')
     # plt.tick_params(axis="both", which="both", bottom="off", top="off", labelbottom="on", left="off", right="off", labelleft="on")
@@ -811,7 +865,8 @@ def plotCountryInfo3(all, column='Confirmed'):
 
         title = column + ' Cases, Top ' + str(countriesNumbers) + ' countries'
 
-        plotCountryAxBar(ax, df['Date'], df[column], label=i, title=title, color=color)
+        plotCountryAxBar(ax, df['Date'], df[column],
+                         label=i, title=title, color=color)
         # ax.text(df['Date'].iloc[-1], df[column].iloc[-1], i, color=color)
 
     bottom, top = plt.ylim()
@@ -820,7 +875,8 @@ def plotCountryInfo3(all, column='Confirmed'):
     if column == 'Confirmed':
         inter = 1000000
     for y in range(int(bottom), int(top), inter):
-        plt.plot(df['Date'], [y] * len(df['Date']), "--", lw=0.5, color="black", alpha=0.3)
+        plt.plot(df['Date'], [y] * len(df['Date']),
+                 "--", lw=0.5, color="black", alpha=0.3)
 
     # plt.xlim('2020-05-01', '2020-06-20')
     # plt.tick_params(axis="both", which="both", bottom="off", top="off", labelbottom="on", left="off", right="off", labelleft="on")

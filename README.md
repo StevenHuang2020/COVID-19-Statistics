@@ -5,7 +5,7 @@
 -->
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue)
 ![Python Version](https://img.shields.io/badge/Python-v3-blue)
-![Tensorflow Version](https://img.shields.io/badge/Tensorflow-V2.9-brightgreen)
+![Tensorflow Version](https://img.shields.io/badge/Tensorflow-V2.10-brightgreen)
 ![Last update](https://img.shields.io/endpoint?color=brightgreen&style=flat-square&url=https%3A%2F%2Fraw.githubusercontent.com%2FStevenHuang2020%2FWebSpider%2Fmaster%2Fcoronavirus%2Fupdate.json)
 
 <!--content start-->

@@ -22,7 +22,7 @@ gNZ_DataSavePath = r'.\data\NZ'
 
 MAIN_URL = 'https://www.health.govt.nz/'
 URL = MAIN_URL + 'our-work/diseases-and-conditions/covid-19-novel-coronavirus/covid-19-data-and-statistics/covid-19-case-demographics'
-CASE_CSV = 'https://raw.githubusercontent.com/minhealthnz/nz-covid-data/main/cases/covid-cases.csv'
+CASE_CSV = 'https://raw.githubusercontent.com/minhealthnz/nz-covid-data/main/cases/covid-case-counts.csv'
 
 
 def getDataFileFromWeb(url=URL):
@@ -77,8 +77,8 @@ def parseConfirmed(df):
     print('AgeGroup sorted:\n', AgeGroup)
     # AgeGroup = [ '<1', '1 to 4', '5 to 9', '10 to 14', '15 to 19', '20 to 29', '30 to 39', '40 to 49', '50 to 59', '60 to 69', '70+']
 
-    DHB = list(set(df['DHB']))
-    print('DHB:\n', DHB)
+    district = list(set(df['District']))
+    print('district:\n', district)
     bOverseas = list(set(df['Overseas travel']))
     print('bOverseas:\n', bOverseas)
 
@@ -98,13 +98,13 @@ def parseConfirmed(df):
         dfAgeGroup = pd.concat([dfAgeGroup, line], ignore_index=True)
     dfAgeGroup.set_index(["Group"], inplace=True)
 
-    columns = ['DHB', 'Number']
+    columns = ['District', 'Number']
     dfDHB = pd.DataFrame()
-    for i in DHB:
+    for i in district:
         line = pd.DataFrame(
-            [[i, df[df['DHB'] == i].shape[0]]], columns=columns)
+            [[i, df[df['District'] == i].shape[0]]], columns=columns)
         dfDHB = pd.concat([dfDHB, line], ignore_index=True)
-    dfDHB.set_index(["DHB"], inplace=True)
+    dfDHB.set_index(["District"], inplace=True)
 
     columns = ['Overseas', 'Number']
     dfbOverseas = pd.DataFrame()
@@ -126,7 +126,7 @@ def parseConfirmed(df):
     plotStatistcs(dfSex, label=label, title=label + ' ' + today)
     label = 'AgeGroup'
     plotStatistcs(dfAgeGroup, label=label, title=label + ' ' + today)
-    label = 'DHB'
+    label = 'district'
     plotStatistcs(dfDHB, label=label, title=label + ' ' + today)
     label = 'Overseas'
     plotStatistcs(dfbOverseas, label=label, title=label + ' ' + today)
@@ -189,8 +189,8 @@ def plotNZDataChange(df):
     startDate = dfDate[0]
     stopDate = dfDate[-1]
     days = totalDays(startDate, stopDate)
-    print('startDate, stopDate=', startDate, stopDate, days)
-
+    print('startDate, stopDate=', startDate, stopDate)
+    print('days=', days)
     columns = ['Date', 'Number', 'Cumlative']
     dfStat = pd.DataFrame()
     s = 0
@@ -249,8 +249,9 @@ def download_file(url):
 def getNZCovid19():
     # file = r'data\NZ\covid-cases.csv'
     file = download_file(CASE_CSV)
+    # dtypes = {'Report Date': 'str', 'Case Status': 'str', 'Sex': 'str', 'Age group': 'str', 'DHB': 'str', 'Overseas travel': 'str'}
     dtypes = {'Report Date': 'str', 'Case Status': 'str', 'Sex': 'str',
-              'Age group': 'str', 'DHB': 'str', 'Overseas travel': 'str'}
+              'Age group': 'str', 'District': 'str', 'Overseas travel': 'str'}
     return pd.read_csv(file, dtype=dtypes)
 
 

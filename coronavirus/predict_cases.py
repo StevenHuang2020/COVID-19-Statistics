@@ -2,6 +2,16 @@
 # python3 steven
 # LSTM regression, solve data set with time change
 """
+from common_path import traverse_files, create_path
+from json_update import get_datetime
+# from tensorflow.keras import optimizers, initializers
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, LSTM, Dropout, BatchNormalization
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+from tensorflow import optimizers
+
 import os
 import datetime
 import pandas as pd
@@ -15,13 +25,6 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 # plt.rcParams['savefig.dpi'] = 300 #matplot figure quality when save
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # not print tf debug info
 
-import tensorflow as tf
-from tensorflow.keras.layers import Dense, LSTM, Dropout, BatchNormalization
-from tensorflow.keras.models import Sequential
-from tensorflow.keras import optimizers, initializers
-
-from json_update import get_datetime
-from common_path import traverse_files, create_path
 
 gDatasetPath = r'.\data\OurWorld'
 gSaveBasePath = r'..\images'
@@ -78,9 +81,11 @@ def plotDataAx(ax, x, y, label='', fontsize=5, color=None):
     ax.plot(x, y, label=label, color=color)
     # ax.set_aspect(1)
     ax.legend(fontsize=fontsize)
-    plt.setp(ax.get_xticklabels(), rotation=30, ha="right", fontsize=fontsize, fontweight=10)
+    plt.setp(ax.get_xticklabels(), rotation=30,
+             ha="right", fontsize=fontsize, fontweight=10)
     plt.setp(ax.get_yticklabels(), fontsize=fontsize)
-    plt.subplots_adjust(left=0.02, bottom=0.09, right=0.99, top=0.92, wspace=None, hspace=None)
+    plt.subplots_adjust(left=0.02, bottom=0.09, right=0.99,
+                        top=0.92, wspace=None, hspace=None)
 
 
 def predictFuture(model, start, Number=5):
@@ -88,7 +93,7 @@ def predictFuture(model, start, Number=5):
     # print('start=', start)
     # print(start.shape,'startval:', gScaler.inverse_transform(start.reshape(1, -1)))
     # start = np.array([start]).reshape(1, 1, 1) #lookback  tf 2.8
-    start = np.array([start]).reshape(1, 1) #lookback  tf 2.9
+    start = np.array([start]).reshape(1, 1)  # lookback  tf 2.9
     result = []
     result.append(start.flatten()[0])
     for _ in range(Number):
@@ -97,7 +102,8 @@ def predictFuture(model, start, Number=5):
         result.append(nextPred.flatten()[0])
         start = nextPred
     # print('predict value=', result)
-    result = gScaler.inverse_transform(np.array(result).reshape(1, -1)).flatten()
+    result = gScaler.inverse_transform(
+        np.array(result).reshape(1, -1)).flatten()
     result = list(map(int, result))
     # print('after inverse redict value=', result)
     return result
@@ -105,7 +111,8 @@ def predictFuture(model, start, Number=5):
 
 def plotPredictCompare(model, trainX, index, data):
     trainPredict = model.predict(trainX).flatten()
-    trainPredict = gScaler.inverse_transform(trainPredict.reshape((trainPredict.shape[0], 1))).flatten()
+    trainPredict = gScaler.inverse_transform(
+        trainPredict.reshape((trainPredict.shape[0], 1))).flatten()
 
     # print('trainPredict.shape=', trainPredict.shape, index.shape, data.shape)
     data = data.flatten()
@@ -161,7 +168,7 @@ def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
     df = pd.DataFrame({'Date': newIndex, 'Predicted cases': pred})
 
     # add predict day newCases
-    df['Predicted daily newCases'] = 0
+    df['Predicted daily cases'] = 0
     for i in range(1, df.shape[0]):
         df.iloc[i, 2] = df.iloc[i, 1] - df.iloc[i - 1, 1]
 
@@ -174,7 +181,8 @@ def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
 
     offset = 150  # 70 120
     # plt.figure(figsize=(8, 6))
-    plt.title('Future ' + str(days) + ' days Covid-19,' + ' Predicted time: ' + get_datetime())
+    plt.title('Future ' + str(days) + ' days Covid-19,' +
+              ' Predicted time: ' + get_datetime())
 
     ax = plt.gca()
     # ax = plt.subplot(1, 1, 1)
@@ -185,7 +193,8 @@ def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
     # print('oldIndex=', index[offset:])
     # print('newIndex=', newIndex)
 
-    tb = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center')
+    tb = plt.table(cellText=df.values, colLabels=df.columns,
+                   loc='center', cellLoc='center')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(df.columns)))
@@ -198,17 +207,17 @@ def plotPredictFuture(model, trainY, index, data, days=gPredictDays):
 
 
 def create_model(look_back=1):
-    model = Sequential()
-    model.add(tf.keras.Input(shape=(1, look_back)))
-    model.add(LSTM(100, return_sequences=True))
-    model.add(LSTM(50, return_sequences=True))
-    # model.add(LSTM(30, return_sequences=True))
-    # model.add(LSTM(20, return_sequences=True))
-    model.add(LSTM(30, activation='relu'))
-    model.add(Dense(30, activation='relu'))
-    model.add(Dense(20, activation='relu'))
-    model.add(Dense(10, activation='relu'))
-    model.add(Dense(1))
+    model = keras.Sequential()
+    model.add(layers.Input(shape=(1, look_back)))
+    model.add(layers.LSTM(100, return_sequences=True))
+    model.add(layers.LSTM(50, return_sequences=True))
+    # model.add(layers.LSTM(30, return_sequences=True))
+    # model.add(layers.LSTM(20, return_sequences=True))
+    model.add(layers.LSTM(30, activation='relu'))
+    model.add(layers.Dense(30, activation='relu'))
+    model.add(layers.Dense(20, activation='relu'))
+    model.add(layers.Dense(10, activation='relu'))
+    model.add(layers.Dense(1))
 
     # fixed learning rate
     lr = 1e-4
@@ -274,7 +283,8 @@ def train(x_train, y_train, first=False, look_back=1):
         model.optimizer.learning_rate = lr
 
     model.summary()
-    model.fit(x_train, y_train, epochs=300, batch_size=64, verbose=1)  # verbose=2
+    model.fit(x_train, y_train, epochs=300,
+              batch_size=64, verbose=1)  # verbose=2
 
     model.save(pre_train_path)
 
@@ -310,12 +320,13 @@ def evaulate_predition(df, file):
         return 0
 
     dfPredict = getPredictDf(file)
-    dfPredict.drop(['Predicted daily newCases'], axis=1, inplace=True)
+    dfPredict.drop(['Predicted daily cases'], axis=1,
+                   inplace=True, errors='ignore')
 
     predictTime = file[file.rfind('\\') + 1: file.rfind('_')]
 
     print('dfPredict=\n', dfPredict)
-    print('predict time=', predictTime)
+    print('Last predicted time=', predictTime)
     allCases = np.zeros((dfPredict.shape[0],))
     accs = []
     for i in range(dfPredict.shape[0]):
@@ -349,9 +360,11 @@ def evaulate_predition(df, file):
         # print('dfPredict=\n', dfPredict)
 
     # plt.figure(figsize=(8, 6))
-    title = 'Prediction Precision\n' + 'PredictedTime: ' + predictTime + ' CheckTime: ' + get_datetime()
+    title = 'Prediction Precision\n' + 'PredictedTime: ' + \
+        predictTime + ' CheckTime: ' + get_datetime()
     plt.title(title, fontsize=9)
-    tb = plt.table(cellText=dfPredict.values, colLabels=dfPredict.columns, loc='center', cellLoc='center')
+    tb = plt.table(cellText=dfPredict.values,
+                   colLabels=dfPredict.columns, loc='center', cellLoc='center')
     tb.auto_set_font_size(False)
     tb.set_fontsize(8)
     # colList = list(range(len(dfPredict.columns)))
@@ -372,7 +385,8 @@ def getNewestFile(path, fmt='csv', index=-1):
     file_dict = {}
     for i in traverse_files(path, fmt):
         ctime = os.stat(os.path.join(i)).st_mtime  # st_ctime
-        ctime = datetime.datetime.fromtimestamp(ctime).strftime('%Y-%m-%d-%H:%M')
+        ctime = datetime.datetime.fromtimestamp(
+            ctime).strftime('%Y-%m-%d-%H:%M')
         file_dict[ctime] = i
 
     sort = sorted(file_dict.keys())
@@ -392,7 +406,7 @@ def predict(data):
     look_back = 1
     x_train, y_train, index, rawdata = prepareDataset(data, look_back)
     model = train(x_train, y_train, first=False, look_back=look_back)
-    
+
     # -----------------start plot prediction---------------
     plotPredictCompare(model, x_train, index, rawdata)
     plotPredictFuture(model, y_train, index, rawdata)
